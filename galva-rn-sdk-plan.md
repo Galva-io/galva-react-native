@@ -499,9 +499,11 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 - ⏳ Remaining: flip the toggle default + pin an exact version when `1.0.0` ships on Maven Central; file the §6.2 upstream asks on galva-android; settle `billing` (`@platform android`).
 - Floor: compileSdk 36 / minSdk 24 / Java 17.
 
-### Phase 2.5 — Expo config plugin (after iOS bridge is green)
-- Author `plugin/src/index.ts` → `app.plugin.js`: iOS deployment-target bump + push entitlement + `UIBackgroundModes` + URL scheme; Android minSdk 24 + permissions + deep-link intent-filter (§3.6). Idempotent mods.
-- Add an **Expo dev-build example** (or `expo prebuild` the existing example) → verify autolinking pulls the pod, the plugin injects config, and a dev client runs Galva. Document the `expo-dev-client` / `prebuild` / EAS path (Expo Go intentionally unsupported).
+### Phase 2.5 — Expo config plugin — ✅ DONE & VERIFIED (2026-06-11)
+- ✅ `plugin/src/index.ts` (built by `tsc -p plugin` in `prepare`) → `app.plugin.js`; shipped via `files` (`app.plugin.js`, `plugin/build`). One option: `{ push?: boolean }` (default `true`). Wrapped in `createRunOncePlugin`.
+- ✅ Mods (raise-only — never lowers an existing value): iOS `ios.deploymentTarget` → 15.0 (Podfile properties), `aps-environment` entitlement, `UIBackgroundModes += remote-notification` (Set — no dupes); Android `android.minSdkVersion` → 24 (only when explicitly pinned lower; absent = template default ≥ 24), `POST_NOTIFICATIONS` permission. *(rev 2: URL-scheme/deep-link mods dropped — the real core has no deep-link API, §3.6; INTERNET comes from the AAR manifest, §3.7.)*
+- ✅ **Verified against a real prebuild** (scratch `create-expo-app` + the packed tarball + `"plugins": ["@galva/react-native"]` + `npx expo prebuild`): all 5 injections present in the generated projects, and a second prebuild run produces no duplicates (idempotent). `npm pack` confirmed the plugin ships.
+- ⏳ Remaining (folded into Phase 3 hardening): full Expo **dev-client build/run** (pod autolinking already proven on the bare example, Phase 1); document the `expo-dev-client`/prebuild/EAS path in docs beyond the README row.
 
 ### Phase 3 — Hardening
 - `parity-check.ts` in CI, docs, integration examples for old + new, release pipeline.
