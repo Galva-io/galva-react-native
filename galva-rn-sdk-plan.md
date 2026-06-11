@@ -518,10 +518,10 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 >
 > | Consumer | Arch | Android | iOS |
 > |---|---|---|---|
-> | Bare RN 0.85 (`example/`) | New | ✅ build + runtime (core flavor too) | ✅ build + runtime (Phase 1) |
-> | Bare RN 0.70.15 | **Old** | ✅ build + runtime | ✅ build + runtime (6 consumer patches — §7 Phase 0) |
-> | Expo SDK 56 + config plugin | New (`fabric:true`) | ✅ build + runtime | ✅ build + sim install (`expo run:ios`) |
-> | Expo SDK 54 + config plugin | **Old** ("Legacy Architecture" log) | ✅ build + runtime | ✅ build (local fmt-vs-Xcode-26 plugin — examples-compat README) |
+> | Bare RN 0.85 (`example/`) | New | ✅ build + dev-bundle runtime (stub & core flavor) | ✅ build + dev-bundle runtime (Phase 1) |
+> | Bare RN 0.70.15 | **Old** | ✅ build + dev-bundle runtime | ✅ build + dev-bundle runtime (6 consumer patches — §7 Phase 0) |
+> | Expo SDK 56 + config plugin | New (`fabric:true`) | ✅ build + dev-bundle runtime | ✅ build + dev-bundle runtime |
+> | Expo SDK 54 + config plugin | **Old** ("Legacy Architecture" log) | ✅ build + dev-bundle runtime | ✅ build + dev-bundle runtime (local fmt plugin — examples-compat README) |
 > | RN 0.60 | Old | ❌ infeasible (toolchain-level, §7 Phase 0) | ❌ infeasible |
 
 - **iOS:** **B** (compile vendored source) × {Old Arch, New Arch} × {floor RN, RN 0.85}. Assert **static linkage** (no `use_frameworks!`) and **zero Podfile edit**; clean build compiles the core, incremental does not.
