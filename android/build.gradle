@@ -32,6 +32,15 @@ apply plugin: "kotlin-android"
 
 apply plugin: "com.facebook.react"
 
+// Source-set toggle (plan §3.7): the Android core (io.galva.sdk:galva-sdk) is
+// unreleased (1.0.0-SNAPSHOT), so the DEFAULT build compiles the stub source
+// set and pulls no core dependency — consumer builds need nothing special.
+// Internal dev flips `Galva_androidCore=true` (gradle.properties or -P) after
+// publishing the core to mavenLocal (or wiring GitHub Packages); the default
+// flips when 1.0.0 ships on Maven Central.
+def isGalvaCoreEnabled = (findProperty("Galva_androidCore") ?: "false").toString().toBoolean()
+def galvaCoreVersion = (findProperty("Galva_androidCoreVersion") ?: "1.0.0-SNAPSHOT").toString()
+
 android {
   namespace "com.galva.reactnative"
 
@@ -40,6 +49,13 @@ android {
   defaultConfig {
     minSdkVersion getExtOrDefault("minSdkVersion")
     targetSdkVersion getExtOrDefault("targetSdkVersion")
+  }
+
+  sourceSets {
+    main {
+      // Same class in both dirs — exactly one is compiled.
+      java.srcDirs += (isGalvaCoreEnabled ? "src/core/kotlin" : "src/stub/kotlin")
+    }
   }
 
   buildFeatures {
@@ -62,6 +78,34 @@ android {
   }
 }
 
+if (isGalvaCoreEnabled) {
+  repositories {
+    mavenLocal()      // interim source for 1.0.0-SNAPSHOT (plan §3.7)
+    google()
+    mavenCentral()
+  }
+}
+
 dependencies {
   implementation "com.facebook.react:react-android"
+
+  if (isGalvaCoreEnabled) {
+    implementation("io.galva.sdk:galva-sdk:$galvaCoreVersion") {
+      // Upstream POM bug: lifecycle-process is published with the literal
+      // version string "lifecycle" (broken version.ref) — unresolvable.
+      // Excluded here and re-added pinned below. Tracked as an upstream ask.
+      exclude group: "androidx.lifecycle", module: "lifecycle-process"
+      // Upstream POM bug: test libraries leak into the published runtime
+      // scope (androidx.test:core-ktx in every module; mockwebserver in
+      // :network). Tracked as upstream asks.
+      exclude group: "androidx.test"
+      exclude group: "com.squareup.okhttp3", module: "mockwebserver"
+    }
+    implementation "androidx.lifecycle:lifecycle-process:2.8.7"
+    // The core declares Play Billing compileOnly — the wrapper must supply it.
+    implementation "com.android.billingclient:billing-ktx:8.0.0"
+    // Flow/coroutines are runtime-scope in the core's POM but part of its
+    // compile API surface (getInAppMessage(): Flow<Message>).
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0"
+  }
 }

@@ -438,25 +438,41 @@ import { configure, identify, show, messages } from '@galva/react-native';
 
 `billing` (**`@platform android`**, backed by the Android core's `BillingManager`, stubbed/rejected on iOS) remains the planned Android-only addition — Phase 2, not in the Phase-1 surface.
 
-#### Android parity checklist — ⚠️ RESET, re-probe at Phase 2 entry
+#### Android parity checklist — ✅ RE-PROBED 2026-06-11 (`identity-module` @ `641d052`, built & published to mavenLocal)
 
-The 2026-06-08 probe table was bucketed against the **stale** draft surface, so its tally (A8·B7·C11·D1) and its 6 "upstream asks" are void — most of the bucket-C rows were methods the *iOS* core doesn't have either. Mappings from that probe that remain valid against the real surface:
+Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPushToken`** (communication-endpoint ops). Coordinate **confirmed `io.galva.sdk:galva-sdk`** (verified by an actual `publishToMavenLocal`). Still **no event tracking at all** — `APIOperation` is identity + push endpoints only.
 
-| iOS surface (real) | Bucket | Android backing |
+**A** = straight through · **B** = shimmed onto a different primitive · **C** = no backing → log-once gap (`@platform ios`) + upstream ask. As implemented in `android/src/core/kotlin/GalvaModule.kt`:
+
+| iOS surface (real) | Bucket | Android backing (as wired) |
 |---|---|---|
-| `configure` | A | `Galva.configure(context, configuration)` |
-| `identify` | A | `identify(userId, email?, obfuscatedAccountId?)` — ⚠️ confirm appAccountToken ↔ obfuscatedAccountId semantics |
+| `configure` | A | `Galva.configure(context, Configuration(apiKey, logLevel, autoTrackSessions, env))` — ⚠️ core's default env is **Development**; the bridge forces Production-by-default for iOS parity |
+| `identify` | A | `identify(userId, email = null, obfuscatedAccountId = appAccountToken)` — ⚠️ StoreKit-token ↔ Play-id semantics = upstream question |
 | `logout` | A | `logout()` |
-| `identifiedUserId` | A | `currentUserId` |
-| `isAnonymous` | A | `isAnonymous` |
-| `messages` (emitter) | A | `getInAppMessage(): Flow<Message>` → `NativeEventEmitter` |
-| `show` | A | `showMessage(activity, message)` |
-| `setEmail` / `setDisplayName` / `setUserProperty` | B | `updateProperties(ProfileProperty.Email/Custom(…))` |
+| `isAnonymous` | A | `isAnonymous` (guarded: unconfigured → `true`) |
+| `messages` (emitter) | A | `getInAppMessage(): Flow<Message>` → collect → `galva#message` event. ⚠️ `Message` carries **only `id`** — `createdAt` stamped at receipt, `rawType` empty, `workflowType` absent (upstream ask) |
+| `show` | A | registry lookup → `showMessage(currentActivity, message)`; same JS error codes as iOS (`MESSAGE_NOT_FOUND` / `NO_ACTIVE_SCENE`) |
+| `registerPushToken` | A | `setPushToken(token)` — **new core API**; `platform: 'apns'` logged & ignored (FCM implied) |
+| `identifiedUserId` | B | `currentUserId` — ⚠️ core falls back to `anonymousId`; bridge shims to iOS semantics (anonymous → `null`) |
+| `unregisterPushToken` | B | `clearPushToken()` — clears the *current* token; the passed token isn't matched (upstream ask) |
+| `setEmail` | B | `updateProperties(ProfileProperty.Email(email))` — ⚠️ Android key `"email"` vs iOS server key `"$gv_email"` (upstream normalization ask) |
+| `setDisplayName` | B | `updateProperties(ProfileProperty.Custom("$gv_fullName", name))` — no typed trait on Android |
+| `setUserProperty` | B | `updateProperties(ProfileProperty.Custom(key, value))` (string/number/bool, rest dropped — mirrors the iOS bridge) |
 | `sdkVersion` | B | `io.galva.sdk.BuildConfig.SDK_VERSION` |
-| `checkForMessages` | B | no-op — Android IAM is a reactive `Flow`, no manual poll needed |
-| `track`, `setOptOut`/`isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `isValidEmail`, `registerEmail`/`unregisterEmail`, `registerPushToken`/`unregisterPushToken`, `setCommunicationPreference` | **TBD** | **re-probe `galva-android` against THIS surface** before wiring Phase 2 |
+| `isValidEmail` | B | local regex in the bridge (no core API) |
+| `checkForMessages` | B | deliberate no-op — Android IAM polls reactively on foreground |
+| `track` | **C** | **no event-tracking API in the core at all** — the largest gap, top upstream ask |
+| `setOptOut` / `isOptedOut` | **C** | no opt-out subsystem → gap (getter resolves `false`) |
+| `setDeviceToken` | **C** | no separate device-token concept (the push endpoint is `registerPushToken`) → gap |
+| `reconcileTransactions` | **C** | not exposed (billing reconciles internally) → gap |
+| `registerEmail` / `unregisterEmail` | **C** | no email communication endpoints → gap |
+| `setCommunicationPreference` | **C** | no preference API → gap |
 
-**Platform tagging — every platform-specific method is marked, not silently stubbed.** Any method the Android core turns out to lack gets **`@platform ios`**; `billing` gets **`@platform android`** — the symmetric case. Both stay exported on **both** platforms (so cross-platform call sites typecheck), carry a JSDoc `@platform …` tag + appear in the docs' platform-availability matrix, and on the **unsupported** platform they **no-op (void/emitter) or reject (`rejectNotImplemented` with the method name) + log once** — never a silent success. *(Interim state, as built: the whole Android module is a full-surface log-once stub — getters resolve safe defaults, `show` rejects `NOT_IMPLEMENTED` — until the core's `1.0.0` ships, §3.7.)* `parity-check.ts` (§7) treats every `@platform ios` row as a **tracked TODO**, not a surface removal; it errors only when an iOS method is missing *and untagged*. When an upstream gap is filled, **drop the tag** — the tag's removal is the parity-restored signal.
+**Tally: A 7 · B 8 · C 8** (of 23). `billing` (`@platform android`, D) unchanged — still deferred.
+
+**Upstream asks for galva-android (re-filed against the real surface):** (1) **event tracking** (`track` — the biggest gap); (2) opt-out; (3) email communication endpoints + a preference API; (4) `reconcileTransactions`; (5) token-addressed push unregister; (6) `Message` metadata (`createdAt`/`rawType`/`workflowType`); (7) trait-key normalization (`"email"` vs `"$gv_email"`); (8) appAccountToken ↔ obfuscatedAccountId semantics; (9) **POM fixes**: `lifecycle-process` published with the literal version string `"lifecycle"` (unresolvable — the wrapper excludes + re-pins it), `androidx.test:core-ktx` leaking into every module's runtime scope, `mockwebserver` leaking from `:network`, coroutines `runtime`-scope despite being API surface (`getInAppMessage(): Flow`).
+
+**Platform tagging — every platform-specific method is marked, not silently stubbed.** Any method the Android core turns out to lack gets **`@platform ios`**; `billing` gets **`@platform android`** — the symmetric case. Both stay exported on **both** platforms (so cross-platform call sites typecheck), carry a JSDoc `@platform …` tag + appear in the docs' platform-availability matrix, and on the **unsupported** platform they **no-op (void/emitter) or reject (`rejectNotImplemented` with the method name) + log once** — never a silent success. *(Interim state, as built: the Android module ships TWO source sets — `src/stub/kotlin` (full-surface log-once stub, the default) and `src/core/kotlin` (real wiring per the table above), toggled by `Galva_androidCore=true` + mavenLocal while the core is `1.0.0-SNAPSHOT`; the default flips when `1.0.0` ships, §3.7.)* `parity-check.ts` (§7) treats every `@platform ios` row as a **tracked TODO**, not a surface removal; it errors only when an iOS method is missing *and untagged*. When an upstream gap is filled, **drop the tag** — the tag's removal is the parity-restored signal.
 
 ---
 
@@ -473,12 +489,14 @@ The 2026-06-08 probe table was bucketed against the **stale** draft surface, so 
 - ✅ Swift/ObjC bridge (`GalvaModule`, remapped to JS `"Galva"`) for the full **real** surface §6.2 — 23 methods; `NativeEventEmitter` for the single `messages` stream (`galva#message`). The draft's `offerErrors` / `identityChanges` emitters don't exist in the core — dropped.
 - ✅ Example app runs on RN 0.85 New Arch — **zero Podfile edit** confirmed (autolinking), clean build links statically (`libGalva.a` = `ar archive`, no `use_frameworks!`), Xcode 26.5 / Swift 6 strict concurrency green.
 
-### Phase 2 — Android (core exists, unreleased — §3.7)
-- Stub module first (API surface returns mocks) so JS/example don't break while the core is `-SNAPSHOT`.
-- When released: `implementation("io.galva…:galva-sdk:<v>")` (final coordinate TBD) + `implementation("com.android.billingclient:billing-ktx:8.0.0")` (core is `compileOnly`). **No source vendoring** — Gradle resolves the transitive graph; autolinking wires `GalvaModule.kt`.
-- **Delegate IAM to the core's `FullScreenInAppMessageActivity`/`showMessage`** (map `getInAppMessage(): Flow<Message>` → `NativeEventEmitter`) — do **not** rebuild the overlay (§3.7).
-- Reconcile the **API parity gap** — **iOS is canonical** (§3.7/§6.2): keep iOS-only methods in the surface and **stub them on Android** (back by `updateProperties`/`identify(email)` where possible, else `rejectNotImplemented` + log). Surface Android-only `billing` as `@platform android` (backed by `BillingManager`; stubbed on iOS).
-- Floor: compileSdk 36 / minSdk 24 / Java 17. Interim source: GitHub Packages or `mavenLocal`.
+### Phase 2 — Android (core exists, unreleased — §3.7) — 🚧 IN PROGRESS (started 2026-06-11)
+- ✅ Stub module (full surface, log-once) — now `src/stub/kotlin`, the **default** source set.
+- ✅ **Re-probe** `identity-module` @ `641d052` against the real 23-export surface → §6.2 table rebuilt (A 7 · B 8 · C 8). Coordinate confirmed `io.galva.sdk:galva-sdk`.
+- ✅ **Real wiring** in `src/core/kotlin/GalvaModule.kt`, toggled by `Galva_androidCore=true` (+ optional `Galva_androidCoreVersion`, default `1.0.0-SNAPSHOT`): `implementation("io.galva.sdk:galva-sdk")` + `billing-ktx:8.0.0` (core declares Play Billing `compileOnly`) + explicit `kotlinx-coroutines-android:1.11.0` (runtime-scope in the POM but API surface). **POM workarounds:** exclude `lifecycle-process` (broken literal version `"lifecycle"`) → re-pin `2.8.7`; exclude leaked test libs (`androidx.test`, `mockwebserver`). **No source vendoring** — Gradle resolves the AAR graph; autolinking wires the module.
+- ✅ **IAM delegated to the core** — `getInAppMessage(): Flow<Message>` → collect → `galva#message` event + id-registry; `show` → `showMessage(currentActivity, message)`. No wrapper overlay.
+- ✅ Interim consumption verified: core built & **published to mavenLocal** (needs the leaked signing props stripped or `-x signMavenPublication` — they don't sign). Both source sets compile against RN 0.85 / Kotlin 2.1.20 (core AAR is Kotlin 2.2 — consumers need Kotlin ≥ 2.1).
+- ⏳ Remaining: runtime smoke-test on an emulator/device; flip the toggle default + pin an exact version when `1.0.0` ships on Maven Central; file the §6.2 upstream asks on galva-android; settle `billing` (`@platform android`).
+- Floor: compileSdk 36 / minSdk 24 / Java 17.
 
 ### Phase 2.5 — Expo config plugin (after iOS bridge is green)
 - Author `plugin/src/index.ts` → `app.plugin.js`: iOS deployment-target bump + push entitlement + `UIBackgroundModes` + URL scheme; Android minSdk 24 + permissions + deep-link intent-filter (§3.6). Idempotent mods.

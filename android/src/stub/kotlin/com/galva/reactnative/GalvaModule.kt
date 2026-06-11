@@ -14,12 +14,16 @@ import com.facebook.react.bridge.ReadableMap
  * the oldest RN the SDK targets and on the New Architecture via the bridging
  * interop layer. This is the deliberate distribution stance (plan §3 / §7).
  *
- * PHASE-3 STUB (plan §3.9 / §7): the Android core (Galva-io/galva-android)
- * exists but is unreleased (`1.0.0-SNAPSHOT`, coordinate unsettled), so every
- * method here is a stub — void calls no-op, getters resolve neutral defaults,
- * `show` rejects — each logging once so the gap is visible, never a silent
- * success pretending to be backed. When `io.galva…:galva-sdk:1.0.0` ships,
- * these delegate to the Maven AAR (no source vendoring on Android).
+ * PHASE-2 STUB (plan §3.7 / §7) — the DEFAULT source set: the Android core
+ * (Galva-io/galva-android) exists but is unreleased (`1.0.0-SNAPSHOT`), so
+ * every method here is a stub — void calls no-op, getters resolve neutral
+ * defaults, `show` rejects — each logging once so the gap is visible, never a
+ * silent success pretending to be backed.
+ *
+ * The REAL backing lives in `src/core/kotlin` (same class, only one of the two
+ * source sets compiles) — opt in with `Galva_androidCore=true` while the core
+ * is consumed from mavenLocal/GitHub Packages; the toggle's default flips when
+ * `io.galva.sdk:galva-sdk:1.0.0` ships on Maven Central.
  */
 class GalvaModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -31,7 +35,7 @@ class GalvaModule(reactContext: ReactApplicationContext) :
   /** Log each stubbed method once so the missing backing is visible (§6.2). */
   private fun stub(method: String) {
     if (warned.add(method)) {
-      Log.w(NAME, "$method(): Android core not released yet — call is a no-op (plan §3.9).")
+      Log.w(NAME, "$method(): Android core not released yet — call is a no-op (plan §3.7).")
     }
   }
 
@@ -130,7 +134,7 @@ class GalvaModule(reactContext: ReactApplicationContext) :
   fun show(messageId: String, promise: Promise) {
     promise.reject(
       "NOT_IMPLEMENTED",
-      "Galva.show(): the Android core is not released yet (plan §3.9) — in-app messages are iOS-only for now."
+      "Galva.show(): the Android core is not released yet (plan §3.7) — in-app messages are iOS-only for now."
     )
   }
 
