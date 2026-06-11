@@ -447,7 +447,7 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 | iOS surface (real) | Bucket | Android backing (as wired) |
 |---|---|---|
 | `configure` | A | `Galva.configure(context, Configuration(apiKey, logLevel, autoTrackSessions, env))` — ⚠️ core's default env is **Development**; the bridge forces Production-by-default for iOS parity |
-| `identify` | A | `identify(userId, email = null, obfuscatedAccountId = appAccountToken)` — ⚠️ StoreKit-token ↔ Play-id semantics = upstream question |
+| `identify` | A | `identify(userId, email = null, obfuscatedAccountId = appAccountToken)` — ⚠️ StoreKit-token ↔ Play-id semantics = upstream question. ⚠️ Eventually consistent (verified on-device 2026-06-11): identify is queued through the core's event channel, so an immediate `identifiedUserId()`/`isAnonymous()` read returns the pre-identify snapshot — document for consumers |
 | `logout` | A | `logout()` |
 | `isAnonymous` | A | `isAnonymous` (guarded: unconfigured → `true`) |
 | `messages` (emitter) | A | `getInAppMessage(): Flow<Message>` → collect → `galva#message` event. ⚠️ `Message` carries **only `id`** — `createdAt` stamped at receipt, `rawType` empty, `workflowType` absent (upstream ask) |
@@ -495,7 +495,8 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 - ✅ **Real wiring** in `src/core/kotlin/GalvaModule.kt`, toggled by `Galva_androidCore=true` (+ optional `Galva_androidCoreVersion`, default `1.0.0-SNAPSHOT`): `implementation("io.galva.sdk:galva-sdk")` + `billing-ktx:8.0.0` (core declares Play Billing `compileOnly`) + explicit `kotlinx-coroutines-android:1.11.0` (runtime-scope in the POM but API surface). **POM workarounds:** exclude `lifecycle-process` (broken literal version `"lifecycle"`) → re-pin `2.8.7`; exclude leaked test libs (`androidx.test`, `mockwebserver`). **No source vendoring** — Gradle resolves the AAR graph; autolinking wires the module.
 - ✅ **IAM delegated to the core** — `getInAppMessage(): Flow<Message>` → collect → `galva#message` event + id-registry; `show` → `showMessage(currentActivity, message)`. No wrapper overlay.
 - ✅ Interim consumption verified: core built & **published to mavenLocal** (needs the leaked signing props stripped or `-x signMavenPublication` — they don't sign). Both source sets compile against RN 0.85 / Kotlin 2.1.20 (core AAR is Kotlin 2.2 — consumers need Kotlin ≥ 2.1).
-- ⏳ Remaining: runtime smoke-test on an emulator/device; flip the toggle default + pin an exact version when `1.0.0` ships on Maven Central; file the §6.2 upstream asks on galva-android; settle `billing` (`@platform android`).
+- ✅ **Runtime smoke-test on emulator** (2026-06-11, Pixel 3a API 32, core flavor): app boots, `configure` spins the core up (operation queue, identity created, API calls fire & handle the fake-key 500 gracefully), `sdkVersion` round-trips `1.0.0-SNAPSHOT` to the UI, `track` gap-logs once, identify processes (`userId=example_user_1` in identity state), IAM polling + Flow collector active, **no crash**. Found: identify is eventually consistent (see the §6.2 table caveat).
+- ⏳ Remaining: flip the toggle default + pin an exact version when `1.0.0` ships on Maven Central; file the §6.2 upstream asks on galva-android; settle `billing` (`@platform android`).
 - Floor: compileSdk 36 / minSdk 24 / Java 17.
 
 ### Phase 2.5 — Expo config plugin (after iOS bridge is green)
