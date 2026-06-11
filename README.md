@@ -18,7 +18,7 @@ No other native setup: the iOS pod autolinks and links statically (no `use_frame
 | | |
 |---|---|
 | iOS | deployment target ≥ 15.0, **Xcode 26+** (the core is Swift 6 and uses an iOS 26 SDK symbol) |
-| Android | minSdk 24 — **currently a stub**: the Galva Android core is unreleased, so all calls no-op/reject until it ships ([plan §3.9](galva-rn-sdk-plan.md)) |
+| Android | minSdk 24 — **currently a stub**: the Galva Android core is unreleased, so all calls no-op/reject until it ships ([plan §3.7](galva-rn-sdk-plan.md)) |
 | Expo | supported via a **development build** (`expo-dev-client`); Expo Go is not supported (custom native code) |
 
 ## Usage

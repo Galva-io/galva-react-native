@@ -4,7 +4,7 @@
 > Goal: wrap the Galva Client SDK for React Native, **support both old & new projects**, **lowest possible RN footprint**.
 >
 > **Progress: Phase 0 + Phase 1 DONE & verified 2026-06-11** — vendored core compiles statically inside the pod (zero Podfile edit, `libGalva.a` confirmed `ar archive`), full bridge + 23-export JS surface, example app green on RN 0.85 / New Arch / Xcode 26.5.
-> **rev 2 changes:** §6 rewritten against the **real** core facade (the original draft assumed APIs the core doesn't have); the wrapper-built overlay + wire-protocol sections and Phase 2 **deleted** (both cores ship their own presenter — `message.show(in:)` — so the wrapper builds no overlay; later §3.x renumbered); §3.4/§5 corrected to the as-built layout (`Galva.podspec` at repo root, `GalvaModule.swift`); Android parity table reset pending a re-probe at Phase 3.
+> **rev 2 changes:** §6 rewritten against the **real** core facade (the original draft assumed APIs the core doesn't have); the wrapper-built overlay + wire-protocol sections and the overlay phase **deleted** (both cores ship their own presenter — `message.show(in:)` — so the wrapper builds no overlay), with later §3.x and phases renumbered (now: Phase 2 = Android, 2.5 = Expo plugin, 3 = hardening); §3.4/§5 corrected to the as-built layout (`Galva.podspec` at repo root, `GalvaModule.swift`); Android parity table reset pending a re-probe at Phase 2.
 
 ---
 
@@ -314,14 +314,14 @@ The wrapper does the minimum: `implementation` the AAR + `billing-ktx`, and **in
 - **Upstream asks (logged, not blocking us):** (1) publish a **`galva-bom`**; (2) fix three build bugs found in the catalog — `kotlinx-serialization-*` pinned to the *coroutines* version ref (wrong version line), `lifecycle-process` using `version = "lifecycle"` (literal string, not `version.ref`), and **`mockwebserver` declared as `implementation` (not `testImplementation`) in `:network`** → a test lib leaking into the production AAR.
 
 **The real near-term blocker — the core is unreleased (`-SNAPSHOT`).** Until a release tag + final coordinate land, in priority order:
-1. **Stub the Android module** (API surface returns mocks) so JS + the example app keep building — exactly the existing Phase-3 plan, just now a *temporary* state, not a permanent "core doesn't exist."
+1. **Stub the Android module** (API surface returns mocks) so JS + the example app keep building — exactly the existing Phase-2 plan, just now a *temporary* state, not a permanent "core doesn't exist."
 2. For internal dev, consume via **GitHub Packages** (already configured; needs a token) or **`publishToMavenLocal`** (`mavenLocal()`).
 3. Flip to the **Maven Central** coordinate the moment `io.galva*:…:1.0.0` ships; pin an exact version.
 
 **API parity gap — iOS ↔ Android cores diverge. Decision: iOS is the canonical surface.**
 When a method exists on one side but not the other, **iOS wins** — the RN TS surface (§6.2) is **iOS-shaped**, and Android is brought up to it (not the intersection).
 
-> ⚠️ **rev 2:** the concrete method list that used to sit here was drawn from the *assumed* iOS surface and is void — most of those "iOS-only methods" (push-consent sextet, `handleDeepLink`, `deviceId`, `accountToken`, …) don't exist on the **real** iOS core either. The canonical surface is now the rewritten §6.2 (23 exports); the per-method Android bucketing is **reset, re-probe at Phase 3 entry** (§6.2 table). The *principle* stands unchanged:
+> ⚠️ **rev 2:** the concrete method list that used to sit here was drawn from the *assumed* iOS surface and is void — most of those "iOS-only methods" (push-consent sextet, `handleDeepLink`, `deviceId`, `accountToken`, …) don't exist on the **real** iOS core either. The canonical surface is now the rewritten §6.2 (23 exports); the per-method Android bucketing is **reset, re-probe at Phase 2 entry** (§6.2 table). The *principle* stands unchanged:
 - **iOS-backed methods missing on Android** stay in the surface — back them by the nearest core primitive where one exists (`setEmail`/`setDisplayName`/`setUserProperty` → `updateProperties(vararg ProfileProperty)`; email also via the `identify(email)` arg), and **stub the rest** (no-op or `rejectNotImplemented`) until the Android core grows them. Log each Android stub so the gap is visible, and file the missing methods as **upstream asks** on galva-android.
 - **Android-only surface (`billing: BillingManager`)** is **surfaced to JS as an `@platform android` method** (§6.2) — backed by the core's `BillingManager` on Android, **stubbed/rejected on iOS** (Galva exposes no billing API there). It is the first and only Android-only member of the surface. (Purchases still execute via native StoreKit 2 / BillingClient — §1.)
 - **IAM delivery differs but is hidden in the bridge**: Android = `getInAppMessage(): Flow<Message>` + `showMessage(activity, message)`; iOS = a `messages` emitter. The RN bridge maps the Android **Flow → a `NativeEventEmitter` event**, so the **JS surface stays identical** (`messages` emitter, iOS-shaped) on both.
@@ -363,7 +363,7 @@ The Android core already ships the full WebView overlay — `FullScreenInAppMess
   "scripts", "react-native.config.js",
   "!ios/galva-src/Package.swift.ref", // settings-diff reference only — NOT shipped
   "!ios/build", "!android/build", /* …standard excludes… */
-  // Phase 3.5 will add: "app.plugin.js", "plugin/build" (Expo config plugin — bare RN ignores it)
+  // Phase 2.5 will add: "app.plugin.js", "plugin/build" (Expo config plugin — bare RN ignores it)
 ]
 ```
 > Ships the vendored **source** (+ `LICENSE` for provenance; first-party code, no obligation). No floor is declared anywhere. The `respond_to?(:install_modules_dependencies)` guard and JS feature-detection are **graceful degradation**, not floor enforcement. peerDeps `*` reflects the primitive/version-agnostic stance.
@@ -373,7 +373,7 @@ The Android core already ships the full WebView overlay — `FullScreenInAppMess
 ## 5. Package structure
 
 ```
-@galva/react-native/                  (as-built Phase 1; Expo plugin = Phase 3.5)
+@galva/react-native/                  (as-built Phase 1; Expo plugin = Phase 2.5)
 ├─ src/
 │  ├─ index.ts            # PUBLIC ENTRY — re-export ONLY (no logic), one line per api/* export
 │  ├─ api/                # one named export per file (configure.ts, track.ts, show.ts, …) — 23 files, flat, tree-shakeable
@@ -390,12 +390,12 @@ The Android core already ships the full WebView overlay — `FullScreenInAppMess
 ├─ android/
 │  ├─ src/main/java/com/galva/reactnative/GalvaModule.kt   # full-surface stub until the core ships (§3.7; log-once + defaults)
 │  └─ build.gradle        # minSdk 24, conditional New Arch
-├─ plugin/                # [Phase 3.5] Expo config plugin source (TS) — builds to app.plugin.js
-├─ app.plugin.js          # [Phase 3.5] Expo plugin entry — consumer "plugins": ["@galva/react-native"]
+├─ plugin/                # [Phase 2.5] Expo config plugin source (TS) — builds to app.plugin.js
+├─ app.plugin.js          # [Phase 2.5] Expo plugin entry — consumer "plugins": ["@galva/react-native"]
 ├─ example/               # app testing both Old & New Arch (verified: RN 0.85 New Arch)
 ├─ scripts/
 │  ├─ sync-galva.sh          # fetch galva-ios @ pinned commit → vendor into ios/galva-src + write galva.lock.json (public repo, no auth)
-│  └─ parity-check.ts        # [Phase 4] reconcile API surface against the native core
+│  └─ parity-check.ts        # [Phase 3] reconcile API surface against the native core
 └─ package.json
 ```
 
@@ -436,9 +436,9 @@ import { configure, identify, show, messages } from '@galva/react-native';
 - **Communication endpoints** — `isValidEmail(email)`, `registerEmail(email)`, `unregisterEmail(email)`, `registerPushToken(token, platform?)`, `unregisterPushToken(token, platform?)` (platform: `'apns' | 'fcm'`), `setCommunicationPreference({ channel, disabled?, categories? })` (channel: `'email' | 'pushNotification' | 'inApp'`)
 - **In-app messages** — `messages(listener)` (emitter → `unsubscribe`), `show(messageId)` (rejects with `NOT_CONFIGURED` / `MESSAGE_NOT_FOUND` / `BUNDLE_UNAVAILABLE` / `BRIDGE_PROTOCOL_MISMATCH` / `NO_ACTIVE_SCENE`), `checkForMessages()`
 
-`billing` (**`@platform android`**, backed by the Android core's `BillingManager`, stubbed/rejected on iOS) remains the planned Android-only addition — Phase 3, not in the Phase-1 surface.
+`billing` (**`@platform android`**, backed by the Android core's `BillingManager`, stubbed/rejected on iOS) remains the planned Android-only addition — Phase 2, not in the Phase-1 surface.
 
-#### Android parity checklist — ⚠️ RESET, re-probe at Phase 3 entry
+#### Android parity checklist — ⚠️ RESET, re-probe at Phase 2 entry
 
 The 2026-06-08 probe table was bucketed against the **stale** draft surface, so its tally (A8·B7·C11·D1) and its 6 "upstream asks" are void — most of the bucket-C rows were methods the *iOS* core doesn't have either. Mappings from that probe that remain valid against the real surface:
 
@@ -454,7 +454,7 @@ The 2026-06-08 probe table was bucketed against the **stale** draft surface, so 
 | `setEmail` / `setDisplayName` / `setUserProperty` | B | `updateProperties(ProfileProperty.Email/Custom(…))` |
 | `sdkVersion` | B | `io.galva.sdk.BuildConfig.SDK_VERSION` |
 | `checkForMessages` | B | no-op — Android IAM is a reactive `Flow`, no manual poll needed |
-| `track`, `setOptOut`/`isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `isValidEmail`, `registerEmail`/`unregisterEmail`, `registerPushToken`/`unregisterPushToken`, `setCommunicationPreference` | **TBD** | **re-probe `galva-android` against THIS surface** before wiring Phase 3 |
+| `track`, `setOptOut`/`isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `isValidEmail`, `registerEmail`/`unregisterEmail`, `registerPushToken`/`unregisterPushToken`, `setCommunicationPreference` | **TBD** | **re-probe `galva-android` against THIS surface** before wiring Phase 2 |
 
 **Platform tagging — every platform-specific method is marked, not silently stubbed.** Any method the Android core turns out to lack gets **`@platform ios`**; `billing` gets **`@platform android`** — the symmetric case. Both stay exported on **both** platforms (so cross-platform call sites typecheck), carry a JSDoc `@platform …` tag + appear in the docs' platform-availability matrix, and on the **unsupported** platform they **no-op (void/emitter) or reject (`rejectNotImplemented` with the method name) + log once** — never a silent success. *(Interim state, as built: the whole Android module is a full-surface log-once stub — getters resolve safe defaults, `show` rejects `NOT_IMPLEMENTED` — until the core's `1.0.0` ships, §3.7.)* `parity-check.ts` (§7) treats every `@platform ios` row as a **tracked TODO**, not a surface removal; it errors only when an iOS method is missing *and untagged*. When an upstream gap is filled, **drop the tag** — the tag's removal is the parity-restored signal.
 
@@ -473,21 +473,18 @@ The 2026-06-08 probe table was bucketed against the **stale** draft surface, so 
 - ✅ Swift/ObjC bridge (`GalvaModule`, remapped to JS `"Galva"`) for the full **real** surface §6.2 — 23 methods; `NativeEventEmitter` for the single `messages` stream (`galva#message`). The draft's `offerErrors` / `identityChanges` emitters don't exist in the core — dropped.
 - ✅ Example app runs on RN 0.85 New Arch — **zero Podfile edit** confirmed (autolinking), clean build links statically (`libGalva.a` = `ar archive`, no `use_frameworks!`), Xcode 26.5 / Swift 6 strict concurrency green.
 
-### Phase 2 — In-app message overlay (iOS) — ✅ DROPPED (rev 2)
-- The iOS core ships its own presenter (`message.show(in: scene)`, downloaded version-pinned bundle); the bridge already delegates to it in Phase 1. **Nothing to build here** — the original wrapper-built overlay + wire-protocol design was deleted from the plan.
-
-### Phase 3 — Android (core exists, unreleased — §3.7)
+### Phase 2 — Android (core exists, unreleased — §3.7)
 - Stub module first (API surface returns mocks) so JS/example don't break while the core is `-SNAPSHOT`.
 - When released: `implementation("io.galva…:galva-sdk:<v>")` (final coordinate TBD) + `implementation("com.android.billingclient:billing-ktx:8.0.0")` (core is `compileOnly`). **No source vendoring** — Gradle resolves the transitive graph; autolinking wires `GalvaModule.kt`.
 - **Delegate IAM to the core's `FullScreenInAppMessageActivity`/`showMessage`** (map `getInAppMessage(): Flow<Message>` → `NativeEventEmitter`) — do **not** rebuild the overlay (§3.7).
 - Reconcile the **API parity gap** — **iOS is canonical** (§3.7/§6.2): keep iOS-only methods in the surface and **stub them on Android** (back by `updateProperties`/`identify(email)` where possible, else `rejectNotImplemented` + log). Surface Android-only `billing` as `@platform android` (backed by `BillingManager`; stubbed on iOS).
 - Floor: compileSdk 36 / minSdk 24 / Java 17. Interim source: GitHub Packages or `mavenLocal`.
 
-### Phase 3.5 — Expo config plugin (after iOS bridge is green)
+### Phase 2.5 — Expo config plugin (after iOS bridge is green)
 - Author `plugin/src/index.ts` → `app.plugin.js`: iOS deployment-target bump + push entitlement + `UIBackgroundModes` + URL scheme; Android minSdk 24 + permissions + deep-link intent-filter (§3.6). Idempotent mods.
 - Add an **Expo dev-build example** (or `expo prebuild` the existing example) → verify autolinking pulls the pod, the plugin injects config, and a dev client runs Galva. Document the `expo-dev-client` / `prebuild` / EAS path (Expo Go intentionally unsupported).
 
-### Phase 4 — Hardening
+### Phase 3 — Hardening
 - `parity-check.ts` in CI, docs, integration examples for old + new, release pipeline.
 
 ---
@@ -534,7 +531,7 @@ The 2026-06-08 probe table was bucketed against the **stale** draft surface, so 
 - ✅ ~~Android scope~~ → **iOS-first; Android stub this round.** But the core **exists** (`identity-module` = full multi-module SDK, `1.0.0-SNAPSHOT`) → Android = **consume the Maven AAR, no vendoring** (mirror-image of iOS, §3.7). Open follow-ups: final **coordinate** (`io.galva.sdk:galva-sdk` vs `io.galva:sdk`), **release** of `1.0.0`, **API-parity** (decided: **iOS canonical** — stub iOS-only methods on Android until the core catches up), **deps** (decided: forward the core's constraints only, no defensive layer; ask upstream for a BOM + fix 3 catalog bugs), and the upstream **secret-leak** rotation.
 - ✅ ~~Expo support~~ → **first-class via dev build + `app.plugin.js`** (§3.6). Expo Go unsupported (custom native); **no** Expo Module rewrite; **no** `expo` peerDep (bare RN untouched). Risk = EAS Xcode-26 image.
 
-**→ No open blocking questions remain. Phase 0/1 DONE (2026-06-11); next up: Phase 3 (Android, blocked on core release — stub shipped), Phase 3.5 (Expo plugin), Phase 4 (parity-check + docs), plus the pending old-RN interop spike (§7 Phase 0).**
+**→ No open blocking questions remain. Phase 0/1 DONE (2026-06-11); next up: Phase 2 (Android, blocked on core release — stub shipped), Phase 2.5 (Expo plugin), Phase 3 (parity-check + docs), plus the pending old-RN interop spike (§7 Phase 0).**
 
 ---
 
