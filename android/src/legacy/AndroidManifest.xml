@@ -1,0 +1,5 @@
+<!-- Manifest for AGP < 7.3 consumers only (no `namespace` DSL there; AGP 8+
+     forbids the package attribute — selected via sourceSets in build.gradle). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.galva.reactnative">
+</manifest>

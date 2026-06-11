@@ -10,7 +10,12 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => min_ios_version_supported }
+  # Galva's floor is iOS 15.0 (StoreKit 2 — plan §3.3). RN's helper can sit
+  # BELOW that on old RN (0.70 → "12.4") and doesn't exist before ~0.70, so
+  # take whichever is higher.
+  galva_ios_floor = Gem::Version.new("15.0")
+  rn_min = defined?(min_ios_version_supported) ? Gem::Version.new(min_ios_version_supported.to_s) : galva_ios_floor
+  s.platforms    = { :ios => (rn_min > galva_ios_floor ? rn_min : galva_ios_floor).to_s }
   s.source       = { :git => "https://github.com/Galva-io/galva-react-native.git", :tag => "#{s.version}" }
 
   # Swift 6 to match the vendored Galva core.
@@ -28,5 +33,11 @@ Pod::Spec.new do |s|
   s.libraries    = "sqlite3"                 # system libsqlite3 (Package.swift linkedLibrary)
   s.frameworks   = "StoreKit", "WebKit"      # core imports these system frameworks
 
-  install_modules_dependencies(s)
+  # RN ≥ 0.71 helper; legacy consumers (spike target 0.68–0.70) get the era
+  # dependency instead (plan §3.4 fallback).
+  if respond_to?(:install_modules_dependencies, true)
+    install_modules_dependencies(s)
+  else
+    s.dependency "React-Core"
+  end
 end

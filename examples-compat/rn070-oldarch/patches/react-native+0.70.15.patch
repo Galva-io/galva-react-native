@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native/ReactCommon/yoga/Yoga.podspec b/node_modules/react-native/ReactCommon/yoga/Yoga.podspec
+index 8ddf0bd..352c490 100644
+--- a/node_modules/react-native/ReactCommon/yoga/Yoga.podspec
++++ b/node_modules/react-native/ReactCommon/yoga/Yoga.podspec
+@@ -37,7 +37,7 @@ Pod::Spec.new do |spec|
+       '-fno-omit-frame-pointer',
+       '-fexceptions',
+       '-Wall',
+-      '-Werror',
++      '',
+       '-std=c++17',
+       '-fPIC'
+   ]

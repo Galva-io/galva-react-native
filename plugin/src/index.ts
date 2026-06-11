@@ -28,11 +28,14 @@ const ANDROID_MIN_SDK = 24;
 const withGalvaIos: ConfigPlugin<GalvaPluginProps> = (config, props) => {
   config = withPodfileProperties(config, (c) => {
     const key = 'ios.deploymentTarget';
-    const current = parseFloat(c.modResults[key] ?? '0');
-    // Raise only when the project pins something lower; when the property is
-    // absent on a modern SDK the template default (≥ 15.1) already satisfies
-    // the floor — except old SDKs, where absent means < 15 → set it.
-    if (current < IOS_DEPLOYMENT_TARGET) {
+    const current = c.modResults[key];
+    // Raise ONLY an existing lower pin. Never create the property: when it is
+    // absent the Expo template default applies, and that default can sit
+    // ABOVE our floor (SDK 54 → 15.1) — writing 15.0 would silently LOWER it
+    // and break pods generated against the template default (found by the
+    // examples-compat matrix). On old SDKs whose default is below 15, pod
+    // install fails loudly and the consumer bumps the target themselves.
+    if (current !== undefined && parseFloat(current) < IOS_DEPLOYMENT_TARGET) {
       c.modResults[key] = IOS_DEPLOYMENT_TARGET.toFixed(1);
     }
     return c;

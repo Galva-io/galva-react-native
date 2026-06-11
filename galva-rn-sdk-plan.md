@@ -480,7 +480,9 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 
 ### Phase 0 — Scaffold & spike — ✅ DONE (except the old-RN spike)
 - ✅ `create-react-native-library`, strip the codegen spec, set up the legacy bridge.
-- ⏳ **Interop spike — STILL PENDING:** verify the legacy bridge runs at a few old RN marks (0.68–0.70). Only RN 0.85 / New Arch is verified so far. Not blocking (no floor is declared either way), but do it before claiming old-RN support in docs.
+- ✅ **Interop spike — DONE (2026-06-11), floor established:**
+  - **RN 0.60: infeasible — no upstream-supported toolchain path.** Xcode 15 removed `std::unary_function` from libc++ → the boost vendored by old RN fails to compile ([facebook/react-native#37748](https://github.com/facebook/react-native/issues/37748)). The RN team backported the fix exactly to **0.72.5 / 0.71.13–14 / 0.70.14** — including a dedicated commit ["Make 0.70 compatible with Xcode 15"](https://github.com/facebook/react-native/commit/5bd1a4256e0f55bada2b3c277e1dc8aba67a57ce) — and **stopped at 0.70, never reaching 0.6x**. (Same pattern at the earlier break: the official Xcode 12.5 troubleshooting guide, [facebook/react-native#31480](https://github.com/facebook/react-native/issues/31480), covers only 0.61–0.64 — 0.60 has no supported path past Xcode 12.4.)
+  - **RN 0.70.15 / Old Architecture: VERIFIED on BOTH platforms** (scratch consumer app + packed tarball). Android: build + emulator runtime smoke clean. iOS: builds under Xcode 26.5 and runs on simulator — **the vendored core answers through the legacy bridge** (`sdkVersion → 1.0.0`). Required **2 lib fixes** (shipped: podspec `min_ios_version_supported` floor-clamp + `install_modules_dependencies` guard; build.gradle legacy-RN path) and **6 documented consumer-side patches** (Node-22 metro/watchman workaround; minSdk 24 + platform 15.0 bumps; strip Yoga `-Werror`; drop the `__apply_Xcode_12_5_M1_post_install_workaround`; disable Flipper; add one empty `.swift` file to the ObjC-only app target so the Swift runtime links). → **Practical floor: RN 0.70 with patches; clean floor: 0.71+.**
 - ✅ **Static-build cost audit (done):** `Package.swift` has `dependencies: []` + no `resources:` → podspec mapping is just `s.libraries = 'sqlite3'`.
 
 ### Phase 1 — iOS: vendored source + bridge — ✅ DONE & VERIFIED (2026-06-11)
@@ -511,6 +513,17 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 ---
 
 ## 8. CI matrix
+
+> **Verified-by-hand matrix (2026-06-11, scratch consumer apps + packed tarball — the apps are committed under [`examples-compat/`](examples-compat/README.md), standalone & outside npm workspaces by design):**
+>
+> | Consumer | Arch | Android | iOS |
+> |---|---|---|---|
+> | Bare RN 0.85 (`example/`) | New | ✅ build + runtime (core flavor too) | ✅ build + runtime (Phase 1) |
+> | Bare RN 0.70.15 | **Old** | ✅ build + runtime | ✅ build + runtime (6 consumer patches — §7 Phase 0) |
+> | Expo SDK 56 + config plugin | New (`fabric:true`) | ✅ build + runtime | ✅ build + sim install (`expo run:ios`) |
+> | Expo SDK 54 + config plugin | **Old** ("Legacy Architecture" log) | ✅ build + runtime | ✅ build (local fmt-vs-Xcode-26 plugin — examples-compat README) |
+> | RN 0.60 | Old | ❌ infeasible (toolchain-level, §7 Phase 0) | ❌ infeasible |
+
 - **iOS:** **B** (compile vendored source) × {Old Arch, New Arch} × {floor RN, RN 0.85}. Assert **static linkage** (no `use_frameworks!`) and **zero Podfile edit**; clean build compiles the core, incremental does not.
 - **galva-src drift guard:** `sync-galva.sh "$(jq -r .commit galva.lock.json)"` then `git diff --exit-code ios/galva-src` (anonymous clone of the public repo).
 - **`Package.swift.ref` settings-diff:** flag if upstream adds `resources:`/deps/swiftSettings the podspec must mirror.

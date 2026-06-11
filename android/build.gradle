@@ -30,7 +30,40 @@ buildscript {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
-apply plugin: "com.facebook.react"
+// --- Legacy-RN detection (plan §3.1: no RN floor — degrade gracefully) -------
+// The `com.facebook.react` Gradle plugin and the `com.facebook.react:react-android`
+// Maven artifact only exist on RN ≥ 0.71; older consumers (spike target 0.68–0.70)
+// get the era wiring: no react plugin + `react-native:+` from the app's
+// node_modules maven repo. Resolve react-native's package.json by walking up
+// from this module (works installed under node_modules AND in this monorepo).
+def findReactNativePackageJson = {
+  def dir = projectDir
+  while (dir != null) {
+    def candidate = new File(dir, "node_modules/react-native/package.json")
+    if (candidate.exists()) return candidate
+    dir = dir.parentFile
+  }
+  return null
+}
+def rnPackageJson = findReactNativePackageJson()
+def rnMinorVersion = 999
+if (rnPackageJson != null) {
+  def rnVersion = new groovy.json.JsonSlurper().parse(rnPackageJson).version
+  def parts = rnVersion.tokenize('.')
+  rnMinorVersion = parts[0].toInteger() > 0 ? 999 : parts[1].toInteger()
+}
+def isLegacyRN = rnMinorVersion < 71
+
+// AGP < 7.3 has no `namespace` DSL — those builds take the manifest-package
+// route instead (src/legacy/AndroidManifest.xml); AGP ≥ 8 forbids exactly that
+// attribute, hence the version switch rather than shipping one manifest.
+def agpParts = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')
+def supportsNamespace = agpParts[0].toInteger() > 7 ||
+  (agpParts[0].toInteger() == 7 && agpParts[1].toInteger() >= 3)
+
+if (!isLegacyRN) {
+  apply plugin: "com.facebook.react"
+}
 
 // Source-set toggle (plan §3.7): the Android core (io.galva.sdk:galva-sdk) is
 // unreleased (1.0.0-SNAPSHOT), so the DEFAULT build compiles the stub source
@@ -42,7 +75,9 @@ def isGalvaCoreEnabled = (findProperty("Galva_androidCore") ?: "false").toString
 def galvaCoreVersion = (findProperty("Galva_androidCoreVersion") ?: "1.0.0-SNAPSHOT").toString()
 
 android {
-  namespace "com.galva.reactnative"
+  if (supportsNamespace) {
+    namespace "com.galva.reactnative"
+  }
 
   compileSdkVersion getExtOrDefault("compileSdkVersion")
 
@@ -53,6 +88,10 @@ android {
 
   sourceSets {
     main {
+      if (!supportsNamespace) {
+        // Pre-AGP-7.3 consumers read the package from the manifest instead.
+        manifest.srcFile "src/legacy/AndroidManifest.xml"
+      }
       // Same class in both dirs — exactly one is compiled.
       java.srcDirs += (isGalvaCoreEnabled ? "src/core/kotlin" : "src/stub/kotlin")
     }
@@ -87,7 +126,14 @@ if (isGalvaCoreEnabled) {
 }
 
 dependencies {
-  implementation "com.facebook.react:react-android"
+  if (isLegacyRN) {
+    // RN ≤ 0.70: the app's template exposes react-native as a local maven repo
+    // ($rootDir/../node_modules/react-native/android) under allprojects.
+    //noinspection GradleDynamicVersion
+    implementation "com.facebook.react:react-native:+"
+  } else {
+    implementation "com.facebook.react:react-android"
+  }
 
   if (isGalvaCoreEnabled) {
     implementation("io.galva.sdk:galva-sdk:$galvaCoreVersion") {
