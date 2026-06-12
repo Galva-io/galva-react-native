@@ -18,6 +18,10 @@ on:
         required: true
         default: patch
         options: [patch, minor, major, prerelease]
+      version:
+        description: Exact version (overrides increment — e.g. "0.1.0" for the first publish)
+        type: string
+        required: false
 
 concurrency:
   group: release
@@ -49,6 +53,11 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Release
-        run: npx release-it --ci --increment ${{ inputs.increment }} --npm.publishArgs=--provenance
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            npx release-it "${{ inputs.version }}" --ci --npm.publishArgs=--provenance
+          else
+            npx release-it --ci --increment "${{ inputs.increment }}" --npm.publishArgs=--provenance
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

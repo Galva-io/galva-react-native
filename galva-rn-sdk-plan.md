@@ -511,7 +511,8 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 - ✅ `scripts/parity-check.mts` in CI (lint job): enforces barrel ↔ `api/*` 1:1, JS native-interface ↔ iOS `RCT_EXTERN_METHOD`, and parity across BOTH Android source sets (stub/core — nothing else catches that drift); missing methods need an `@platform` tag or the build fails. Negative-tested.
 - ✅ CI live on `develop` (2026-06-12): all 5 jobs green — incl. build-ios compiling the vendored Swift 6 core on the runner (first independent verification off the dev machine). Fixed: workflow only triggered on `main`; `packageManager` field (required by turbo 2.x) lost in the yarn→npm migration.
 - ✅ Integration guides in `docs/` (shipped in the npm package, linked from README): push-notifications (setDeviceToken vs registerPushToken, bare iOS/Android + Expo flows), expo (dev-build, plugin injections/options, EAS), legacy-react-native (0.71+ as-is / 0.70 patch list / ≤0.6x impossible with sources). identify/identifiedUserId TSDoc now documents eventual consistency.
-- ⏳ Remaining: release pipeline (npm publish workflow, CHANGELOG/semver — sensibly gated on galva-ios's first release tag).
+- ✅ Release pipeline: release-it (`.release-it.json` — quality gates in hooks, tag `vX.Y.Z`, auto-generated GitHub release, npm publish with `--provenance`; scoped access public) + a `workflow_dispatch` Release workflow (increment choice or exact version for the first publish). CHANGELOG.md seeded (keep-a-changelog, manual upkeep). **Prereqs before the first publish:** `NPM_TOKEN` repo secret (@galva scope) + the gate below.
+- ⏳ **First-publish gate:** hold `0.1.0` until galva-ios cuts its first release tag → re-pin the vendored core by tag (`sync-galva.sh <tag>`), then run the Release workflow with version `0.1.0`.
 
 ---
 
