@@ -1,7 +1,7 @@
 {
   "name": "@galva/react-native",
   "version": "0.1.0",
-  "description": "React Native SDK for Galva \u2014 subscription retention platform",
+  "description": "React Native SDK for Galva — subscription retention platform",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -126,5 +126,6 @@
       "eslint"
     ],
     "version": "0.62.1"
-  }
+  },
+  "packageManager": "npm@10.9.8"
 }
