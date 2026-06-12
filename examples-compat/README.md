@@ -2,7 +2,7 @@
 
 Standalone consumer apps verifying `@galva/react-native` across RN versions,
 architectures, and Expo — the verified-by-hand matrix in
-[`galva-rn-sdk-plan.md` §8](../galva-rn-sdk-plan.md).
+[`galva-rn-sdk-plan.md` §6](../galva-rn-sdk-plan.md).
 
 **These are NOT npm workspaces** (deliberately): each app installs the library
 from a fresh `npm pack` tarball, exactly like a real consumer — exercising the
@@ -116,3 +116,34 @@ Notes:
   in the fmt version RN 0.81 still compiles from source — the plugin forces the
   fmt pod to C++17 in the generated Podfile. Consumer-side era patch, not a
   Galva issue (fmt fails before the Galva pod compiles).
+
+## 4. Android core toggle (dev-only)
+
+By default these apps exercise the Android **stub** (plan §3.6). To run them
+against the real (unreleased) Android core — verified 2026-06-12:
+
+1. Publish the core to mavenLocal: clone galva-android, strip the leaked
+   `signingInMemory*` props from `gradle.properties`, run
+   `./gradlew publishToMavenLocal`.
+2. Add the dev-only repo block to the **app's** `android/build.gradle`
+   (Gradle resolves the app's classpath with the *app's* repositories — the
+   library's own `mavenLocal()` block never reaches that resolution; for the
+   Expo apps the file is prebuild-generated, so re-add it after every
+   `npx expo prebuild`):
+
+   ```gradle
+   if ((findProperty("Galva_androidCore") ?: "false").toString().toBoolean()) {
+     allprojects { repositories { mavenLocal() } }
+   }
+   ```
+3. Build with the flag and install/run as in the sections above:
+   `(cd android && ./gradlew :app:assembleDebug -PGalva_androidCore=true)`.
+
+**Expected:** Android shows `sdkVersion: 1.0.0-SNAPSHOT` (the real core) and
+logcat has **zero** `Galva: …no-op` stub lines.
+
+| App | Core-toggle result |
+|---|---|
+| `expo54-oldarch` | ✅ build + Metro dev-bundle runtime on emulator |
+| `expo56-newarch` | ✅ build + Metro dev-bundle runtime on emulator |
+| `rn070-oldarch` | ❌ **infeasible on the RN 0.70-era toolchain** — three independent blockers from the core AAR itself: it demands **compileSdk 36** (era AAPT2 ≤ AGP 7.4 can't even parse android-36's `android.jar`), ships **Java-17 bytecode** (AGP 7.2.1's D8 can't dex it; 7.4.2 can), and carries **Kotlin 2.2 metadata** (Kotlin 2.0.x throws an internal compiler error; KGP ≥ 2.1 needs Gradle ≥ 7.6.3). Every fix escalates to AGP 8 / Gradle 8 / Kotlin 2.1 — at which point it is no longer an RN 0.70-era app. The stub remains the RN ≤ 0.70 Android story (plan §3.6). |

@@ -19,7 +19,7 @@ No other native setup: the iOS pod autolinks and links statically (no `use_frame
 |---|---|
 | React Native | no declared floor — verified on **0.85 (New Arch)** and **0.70 (Old Arch)**; RN ≤ 0.70 needs era-specific consumer patches (Flipper off, an empty `.swift` file in ObjC-only apps, …— see [plan §6](galva-rn-sdk-plan.md)); RN ≤ 0.6x is not buildable on 2026 toolchains at all |
 | iOS | deployment target ≥ 15.0, **Xcode 26+** (the core is Swift 6 and uses an iOS 26 SDK symbol) |
-| Android | minSdk 24 — **stub by default**: the Galva Android core is unreleased (`1.0.0-SNAPSHOT`), so calls no-op/reject. Real core wiring exists behind the `Galva_androidCore=true` Gradle property (dev-only, needs the core on mavenLocal) and becomes the default when `io.galva.sdk:galva-sdk:1.0.0` ships ([plan §3.6](galva-rn-sdk-plan.md)) |
+| Android | minSdk 24 — **stub by default**: the Galva Android core is unreleased (`1.0.0-SNAPSHOT`), so calls no-op/reject. Real core wiring exists behind the `Galva_androidCore=true` Gradle property (dev-only, needs the core on mavenLocal **and a modern Android toolchain** — the core AAR demands compileSdk 36 / Java-17-capable D8 / Kotlin ≥ 2.1, so it can't ride RN ≤ 0.70-era builds) and becomes the default when `io.galva.sdk:galva-sdk:1.0.0` ships ([plan §3.6](galva-rn-sdk-plan.md)) |
 | Expo | supported via a **development build** (`expo-dev-client`); Expo Go is not supported (custom native code). Add the config plugin: `"plugins": ["@galva/react-native"]` in `app.json` — injects the push entitlement + `UIBackgroundModes` (iOS) and `POST_NOTIFICATIONS` (Android); pass `{ "push": false }` to opt out |
 
 ## Usage

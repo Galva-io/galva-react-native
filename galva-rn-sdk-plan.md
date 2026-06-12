@@ -66,7 +66,9 @@ The wrapper builds **no overlay** and never speaks the WebView↔native protocol
 No vendoring, no NDK: depend on the published AAR and let Gradle resolve the graph. Because the core is unreleased, the module ships **two source sets** selected by the `Galva_androidCore` Gradle property:
 
 - **`src/stub/kotlin` (default):** full-surface stub — void calls no-op with a one-time log, getters resolve safe defaults, `show` rejects. Consumers build with zero extra setup.
-- **`src/core/kotlin` (dev, `-PGalva_androidCore=true`):** real wiring against `io.galva.sdk:galva-sdk:1.0.0-SNAPSHOT` from mavenLocal (`publishToMavenLocal` in galva-android — strip the leaked `signingInMemory*` props first or signing fails). Verified end-to-end on emulator.
+- **`src/core/kotlin` (dev, `-PGalva_androidCore=true`):** real wiring against `io.galva.sdk:galva-sdk:1.0.0-SNAPSHOT` from mavenLocal (`publishToMavenLocal` in galva-android — strip the leaked `signingInMemory*` props first or signing fails). The **app** must also add `mavenLocal()` to its own repositories (Gradle resolves the app's classpath with the app's repos — the library's own block never reaches it; `example/` carries the dev-only block, `examples-compat/README.md` §4 has the snippet). Verified end-to-end on emulator (2026-06-12): bare RN 0.85, Expo SDK 54 (old arch) and Expo SDK 56 (new arch) all answer `sdkVersion: 1.0.0-SNAPSHOT` over a Metro dev bundle with zero stub logs.
+
+**The core AAR sets a real Android-toolchain floor** (measured on the RN 0.70 app): its metadata demands **compileSdk 36** (AAPT2 of AGP ≤ 7.4 cannot parse android-36's `android.jar` — binary format gap, no suppress flag), its classes are **Java-17 bytecode** (AGP 7.2.1's D8 can't dex class-file 61; 7.4.2 can), and its Kotlin metadata is **2.2** (Kotlin 2.0.x ICEs; KGP ≥ 2.1 needs Gradle ≥ 7.6.3). Net: real-core consumers need a modern stack (AGP 8.x verified); on the RN 0.70-era toolchain the core is **infeasible** — each fix escalates off-era. The stub is what keeps RN ≤ 0.70 consumers building.
 
 POM workarounds the wrapper carries (filed as upstream asks): exclude `androidx.lifecycle:lifecycle-process` (published with the literal version string `"lifecycle"`) and re-pin it; exclude leaked test libs (`androidx.test`, `mockwebserver`); add `kotlinx-coroutines-android` explicitly (runtime-scope in the POM but part of the compile API — `getInAppMessage(): Flow`); add `billing-ktx` (core declares Play Billing `compileOnly`). Dependency stance: **forward the core's constraints only** — no BOM/`force` layer until upstream publishes one. Consumers need **Kotlin ≥ 2.1** (the AAR is Kotlin 2.2).
 
@@ -122,11 +124,13 @@ examples-compat/      # frozen consumer apps: rn070-oldarch, expo54-oldarch, exp
 
 | Consumer | Arch | Android | iOS |
 |---|---|---|---|
-| Bare RN 0.85 (`example/`) | New | ✅ (stub & core flavor) | ✅ |
-| Bare RN 0.70.15 | **Old** | ✅ | ✅ (6 consumer patches — `docs/legacy-react-native.md`) |
-| Expo SDK 56 + plugin | New (`fabric:true`) | ✅ | ✅ |
-| Expo SDK 54 + plugin | **Old** | ✅ | ✅ (local fmt-vs-Xcode-26 plugin — `examples-compat/README.md`) |
+| Bare RN 0.85 (`example/`) | New | ✅ (stub **and** core toggle) | ✅ |
+| Bare RN 0.70.15 | **Old** | ✅ stub only — core toggle infeasible on the 0.70-era toolchain (§3.6) | ✅ (6 consumer patches — `docs/legacy-react-native.md`) |
+| Expo SDK 56 + plugin | New (`fabric:true`) | ✅ (stub **and** core toggle) | ✅ |
+| Expo SDK 54 + plugin | **Old** | ✅ (stub **and** core toggle) | ✅ (local fmt-vs-Xcode-26 plugin — `examples-compat/README.md`) |
 | RN 0.60 | Old | ❌ | ❌ |
+
+Android core-toggle legs re-verified 2026-06-12 (`examples-compat/README.md` §4): real core over a Metro dev bundle, `sdkVersion: 1.0.0-SNAPSHOT`, zero stub logs.
 
 **Floor: 0.71+ works as-is; 0.70 with documented patches; ≤ 0.6x is unbuildable on a 2026 toolchain** — independent of Galva: RN's toolchain fixes were only ever backported to 0.70 ([Xcode 15 fix](https://github.com/facebook/react-native/commit/5bd1a4256e0f55bada2b3c277e1dc8aba67a57ce), [#37748](https://github.com/facebook/react-native/issues/37748)); the [Xcode 12.5 guide](https://github.com/facebook/react-native/issues/31480) covers only 0.61–0.64. The on-iOS proof that the whole chain works on Old Arch: RN 0.70 simulator runtime returns the real core's `sdkVersion: 1.0.0` over the legacy bridge.
 
