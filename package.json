@@ -1,7 +1,7 @@
 {
   "name": "@galva/react-native",
   "version": "0.1.0",
-  "description": "React Native SDK for Galva — subscription retention platform",
+  "description": "React Native SDK for Galva \u2014 subscription retention platform",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
@@ -43,7 +43,8 @@
     "clean": "del-cli android/build example/android/build example/android/app/build example/ios/build lib",
     "prepare": "bob build && tsc -p plugin",
     "typecheck": "tsc",
-    "lint": "eslint \"**/*.{js,ts,tsx}\""
+    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "parity-check": "node scripts/parity-check.mts"
   },
   "keywords": [
     "react-native",

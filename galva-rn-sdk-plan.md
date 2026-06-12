@@ -395,7 +395,7 @@ The Android core already ships the full WebView overlay — `FullScreenInAppMess
 ├─ example/               # app testing both Old & New Arch (verified: RN 0.85 New Arch)
 ├─ scripts/
 │  ├─ sync-galva.sh          # fetch galva-ios @ pinned commit → vendor into ios/galva-src + write galva.lock.json (public repo, no auth)
-│  └─ parity-check.ts        # [Phase 3] reconcile API surface against the native core
+│  └─ parity-check.mts       # ✅ diffs JS surface ↔ iOS .m ↔ BOTH Android source sets; @platform escape hatch; runs in CI (lint job)
 └─ package.json
 ```
 
@@ -507,8 +507,10 @@ Facade changes since the 06-08 probe: the core **gained `setPushToken`/`clearPus
 - ✅ **Verified against a real prebuild** (scratch `create-expo-app` + the packed tarball + `"plugins": ["@galva/react-native"]` + `npx expo prebuild`): all 5 injections present in the generated projects, and a second prebuild run produces no duplicates (idempotent). `npm pack` confirmed the plugin ships.
 - ⏳ Remaining (folded into Phase 3 hardening): full Expo **dev-client build/run** (pod autolinking already proven on the bare example, Phase 1); document the `expo-dev-client`/prebuild/EAS path in docs beyond the README row.
 
-### Phase 3 — Hardening
-- `parity-check.ts` in CI, docs, integration examples for old + new, release pipeline.
+### Phase 3 — Hardening — 🚧 IN PROGRESS (started 2026-06-12)
+- ✅ `scripts/parity-check.mts` in CI (lint job): enforces barrel ↔ `api/*` 1:1, JS native-interface ↔ iOS `RCT_EXTERN_METHOD`, and parity across BOTH Android source sets (stub/core — nothing else catches that drift); missing methods need an `@platform` tag or the build fails. Negative-tested.
+- ✅ CI live on `develop` (2026-06-12): all 5 jobs green — incl. build-ios compiling the vendored Swift 6 core on the runner (first independent verification off the dev machine). Fixed: workflow only triggered on `main`; `packageManager` field (required by turbo 2.x) lost in the yarn→npm migration.
+- ⏳ Remaining: integration docs (push-token flow, old-RN guide — consumer-facing version of examples-compat's patch list), release pipeline (npm publish workflow, CHANGELOG/semver — sensibly gated on galva-ios's first release tag).
 
 ---
 
