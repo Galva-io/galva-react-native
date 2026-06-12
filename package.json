@@ -45,7 +45,8 @@
     "prepare": "bob build && tsc -p plugin",
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "parity-check": "node scripts/parity-check.mts"
+    "parity-check": "node scripts/parity-check.mts",
+    "release": "release-it"
   },
   "keywords": [
     "react-native",
@@ -67,7 +68,8 @@
     "iosCoreCommit": "95c86a1cbfa1082608bb502eab4e6c9358a014a9"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",
@@ -86,6 +88,7 @@
     "react": "19.2.3",
     "react-native": "0.85.0",
     "react-native-builder-bob": "^0.42.1",
+    "release-it": "^20.2.0",
     "turbo": "^2.9.16",
     "typescript": "^6.0.3"
   },

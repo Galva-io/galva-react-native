@@ -85,7 +85,28 @@ The `package.json` file contains various scripts for common tasks:
     - `npm run example start`: start the Metro server for the example app.
 - `npm run example android`: run the example app on Android.
 - `npm run example ios`: run the example app on iOS.
-  
+- `npm run parity-check`: diff the JS surface against every native bridge (also runs in CI).
+- `npm run release`: cut a release (see below).
+
+### Releasing
+
+Releases are driven by [release-it](https://github.com/release-it/release-it)
+(`.release-it.json`): it runs the quality gates (lint, typecheck,
+parity-check), bumps the version, commits + tags (`vX.Y.Z`), creates a GitHub
+release with auto-generated notes, and publishes to npm (`npm publish` rebuilds
+via the `prepare` script; scoped-package access is `public`).
+
+- **Preferred: the Release workflow** (GitHub → Actions → Release → Run
+  workflow, pick the increment). Requires the `NPM_TOKEN` repo secret (npm
+  automation token with publish rights for the `@galva` scope).
+- Local alternative: `npm run release` (needs `gh`/`GITHUB_TOKEN` for the
+  GitHub release and an authenticated npm session).
+- Update `CHANGELOG.md` (move `Unreleased` into the new version section) as
+  part of the release.
+- **First-publish gate** (plan §7 Phase 3): hold `0.1.0` until `galva-ios`
+  cuts its first release tag — then re-pin the vendored core by tag
+  (`scripts/sync-galva.sh <tag>`) before releasing.
+
 ### Sending a pull request
 
 > **Working on your first pull request?** You can learn how from this _free_ series: [How to Contribute to an Open Source Project on GitHub](https://app.egghead.io/playlists/how-to-contribute-to-an-open-source-project-on-github).
