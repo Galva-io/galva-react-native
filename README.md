@@ -63,6 +63,12 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 
 Each export carries full TSDoc; types (`GalvaConfig`, `InAppMessage`, …) are exported from the package root.
 
+## Guides
+
+- [Push notifications](docs/push-notifications.md) — APNs/FCM token flow, `setDeviceToken` vs `registerPushToken`, preferences
+- [Expo](docs/expo.md) — dev-build setup, config-plugin injections & options, EAS
+- [Older React Native](docs/legacy-react-native.md) — supported range, the RN 0.70 patch list, why ≤ 0.6x can't work
+
 ## Contributing
 
 - [Development workflow](CONTRIBUTING.md#development-workflow) — the dev app lives in [`example/`](example); the RN-0.70/Expo old-&-new-arch compatibility apps live in [`examples-compat/`](examples-compat/README.md)

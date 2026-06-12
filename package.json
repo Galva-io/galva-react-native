@@ -24,6 +24,7 @@
     "galva.lock.json",
     "app.plugin.js",
     "plugin/build",
+    "docs",
     "scripts",
     "react-native.config.js",
     "!ios/galva-src/Package.swift.ref",

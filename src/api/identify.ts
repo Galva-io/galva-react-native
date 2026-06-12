@@ -7,6 +7,10 @@ const UUID_RE =
  * Identify the current end user. Subsequent events are attributed to this
  * user id until {@link logout} is called.
  *
+ * Eventually consistent: the native core applies the identity asynchronously,
+ * so {@link identifiedUserId} / {@link isAnonymous} read immediately after
+ * this call may still return the previous state (holds on both platforms).
+ *
  * @param userId Your app's stable identifier for the user.
  * @param options.appAccountToken Optional StoreKit 2 `appAccountToken` (UUID
  *   string) for linking subscription purchases to this user. iOS only —
