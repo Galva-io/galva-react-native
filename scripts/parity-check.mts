@@ -1,9 +1,9 @@
-// Parity check (plan §7 Phase 3): mechanically diffs the JS surface against
+// Parity check (plan §7): mechanically diffs the JS surface against
 // every native bridge so the three implementations can't drift apart.
 //
 // Invariants enforced:
 //   1. src/index.ts re-exports exactly one named export per src/api/* file
-//      (the sanctioned barrel — plan §5).
+//      (the sanctioned barrel — plan §4).
 //   2. Every method of the GalvaNativeModule interface (src/NativeBridge.ts —
 //      the JS↔native join point) is declared in the iOS bridge
 //      (RCT_EXTERN_METHOD in GalvaModule.m). addListener/removeListeners are
@@ -13,7 +13,7 @@
 //      so nothing else catches drift between them.
 //   4. Escape hatch: a method missing on one platform is a tracked TODO (not
 //      an error) ONLY if its src/api/<name>.ts doc carries an `@platform`
-//      tag (plan §6.2) — missing AND untagged fails the build.
+//      tag (plan §4) — missing AND untagged fails the build.
 //
 // Runs under Node's native TypeScript type-stripping (Node ≥ 22.18 / 24):
 //   node scripts/parity-check.ts
@@ -48,7 +48,7 @@ for (const m of indexSrc.matchAll(
 )) {
   if (m[1] !== m[2]) {
     errors.push(
-      `index.ts: export '${m[1]}' does not match its file './api/${m[2]}' (one export per file, same name — plan §5)`
+      `index.ts: export '${m[1]}' does not match its file './api/${m[2]}' (one export per file, same name — plan §4)`
     );
   }
 }
@@ -105,7 +105,7 @@ function compare(label: string, native: Set<string>, iosExempt: boolean) {
     if (iosExempt && EMITTER_CONTRACT.has(m)) continue;
     if (!native.has(m)) {
       if (isPlatformTagged(m)) {
-        todos.push(`${label}: '${m}' missing — tracked via @platform tag (plan §6.2)`);
+        todos.push(`${label}: '${m}' missing — tracked via @platform tag (plan §4)`);
       } else {
         errors.push(
           `${label}: JS calls '${m}' but the bridge does not declare it (add it, or tag src/api/${m}.ts with @platform)`

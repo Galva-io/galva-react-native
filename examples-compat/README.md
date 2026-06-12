@@ -16,11 +16,11 @@ development app (workspace-linked, CI-built) lives in [`../example`](../example)
 | `expo56-newarch` | Expo SDK 56 (default) | **New** (`fabric:true`, interop) | prebuild (config plugin) ✅ · Android + iOS: build ✅, dev-bundle runtime ✅ |
 
 (RN 0.85 / New Arch / bare is covered by `../example`. RN ≤ 0.6x is **not
-buildable** on a 2026 toolchain at all — sources in plan §7 Phase 0.)
+buildable** on a 2026 toolchain at all — sources in plan §6.)
 
 ## 0. One-time prerequisites
 
-- **Xcode 26+** (the vendored Galva core is Swift 6 — plan §3.3), CocoaPods, JDK 17, Android SDK (an AVD with API ≥ 24; a debug RN APK is ~115 MB, so give the AVD an 8 GB data partition).
+- **Xcode 26+** (the vendored Galva core is Swift 6 — plan §2), CocoaPods, JDK 17, Android SDK (an AVD with API ≥ 24; a debug RN APK is ~115 MB, so give the AVD an 8 GB data partition).
 - ⚠️ **Xcode build location must be the DEFAULT.** A global custom location (Xcode → Settings → Locations → Derived Data: Custom) makes every xcodebuild share one folder — Expo SDK 56 iOS then fails with *"Xcode build failed due to concurrent builds"* (`ExpoModulesJSI`'s nested xcodebuild collides with the outer one), and parallel builds corrupt each other.
 - ⚠️ **watchman + Node 22**: if watchman's state dir (`$TMPDIR/<user>-state`) is root-owned, Metro 0.72 (RN 0.70) crashes on start. Either fix the dir's ownership or run Metro with watchman hidden from `PATH` (commands below do this).
 
@@ -42,7 +42,7 @@ from cache, since the version doesn't change.)
 ## 2. `rn070-oldarch` (bare RN 0.70.15, Old Architecture)
 
 Ships **pre-applied era patches** so it builds on a 2026 toolchain — each is a
-consumer-side workaround, not a library issue (full story: plan §7 Phase 0):
+consumer-side workaround, not a library issue (full story: plan §6):
 
 - `patches/react-native+0.70.15.patch` (applied by `patch-package` on postinstall) — strips Yoga's `-Werror` (deprecated-literal-operator errors under new clang)
 - `ios/Podfile` — platform 15.0; the `__apply_Xcode_12_5_M1_post_install_workaround` call removed (it forced every pod to deployment target 11, breaking Swift availability) while keeping its one useful piece as an explicit sed: the RCT-Folly `Time.h` clockid_t fix; Flipper disabled (doesn't compile under Xcode 26)
@@ -78,7 +78,7 @@ driver — they just wrap the steps above.)
 Android `sdkVersion: 0.0.0-android-stub` plus one `Galva: …no-op` logcat line
 per called method (the Android core is unreleased — stub by default).
 `identifiedUserId: null/undefined`, `isAnonymous: true` right after launch are
-expected (identify is eventually consistent — plan §6.2).
+expected (identify is eventually consistent — plan §4).
 
 ## 3. `expo54-oldarch` / `expo56-newarch` (CNG — `android/`/`ios/` are generated and gitignored)
 

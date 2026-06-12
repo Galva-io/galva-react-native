@@ -6,7 +6,7 @@ import type {
   UserPropertyValue,
 } from './types';
 
-// Internal — NOT re-exported from index.ts (plan §5). The single native module,
+// Internal — NOT re-exported from index.ts (plan §4). The single native module,
 // exposed to JS as "Galva" (iOS remaps GalvaModule → "Galva"; Android
 // getName() returns "Galva"). Deliberately a plain NativeModules lookup, not a
 // TurboModule registry: version-agnostic, works on the oldest supported RN and

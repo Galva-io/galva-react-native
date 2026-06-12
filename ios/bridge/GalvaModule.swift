@@ -6,7 +6,7 @@ import UIKit
 /// `RCT_EXTERN_REMAP_MODULE` in GalvaModule.m. The class is named
 /// `GalvaModule` (not `Galva`) on purpose: the vendored core (ios/galva-src)
 /// compiles into the same pod module and defines its own public `Galva` type
-/// (plan §9). Because bridge and core share one module, the bridge calls the
+/// (plan §3.1). Because bridge and core share one module, the bridge calls the
 /// core directly — no `import Galva`.
 ///
 /// Surface is 1:1 with the core facade (Galva / AppEvents / AppUser /

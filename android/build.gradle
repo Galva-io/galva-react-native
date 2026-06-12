@@ -65,7 +65,7 @@ if (!isLegacyRN) {
   apply plugin: "com.facebook.react"
 }
 
-// Source-set toggle (plan §3.7): the Android core (io.galva.sdk:galva-sdk) is
+// Source-set toggle (plan §3.6): the Android core (io.galva.sdk:galva-sdk) is
 // unreleased (1.0.0-SNAPSHOT), so the DEFAULT build compiles the stub source
 // set and pulls no core dependency — consumer builds need nothing special.
 // Internal dev flips `Galva_androidCore=true` (gradle.properties or -P) after
@@ -119,7 +119,7 @@ android {
 
 if (isGalvaCoreEnabled) {
   repositories {
-    mavenLocal()      // interim source for 1.0.0-SNAPSHOT (plan §3.7)
+    mavenLocal()      // interim source for 1.0.0-SNAPSHOT (plan §3.6)
     google()
     mavenCentral()
   }

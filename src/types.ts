@@ -1,4 +1,4 @@
-// Shared public types for the Galva surface (plan §5). Transcribed 1:1 from
+// Shared public types for the Galva surface (plan §4). Transcribed 1:1 from
 // the vendored iOS core facade (ios/galva-src/Sources/Galva.swift).
 
 /**

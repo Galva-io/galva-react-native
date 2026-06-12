@@ -30,13 +30,13 @@ import kotlinx.coroutines.launch
  * Legacy bridge module (NOT a TurboModule / codegen spec) — exposed to JS as
  * "Galva". Plain [ReactContextBaseJavaModule] is version-agnostic: it runs on
  * the oldest RN the SDK targets and on the New Architecture via the bridging
- * interop layer. This is the deliberate distribution stance (plan §3 / §7).
+ * interop layer. This is the deliberate distribution stance (plan §3.1).
  *
- * CORE-BACKED variant (plan §3.7) — compiled instead of `src/stub/kotlin`
+ * CORE-BACKED variant (plan §3.6) — compiled instead of `src/stub/kotlin`
  * when `Galva_androidCore=true`. Delegates to the core facade
  * `io.galva.sdk.Galva` (Maven AAR, interim mavenLocal/GitHub Packages while
  * `1.0.0-SNAPSHOT`). Methods the Android core doesn't expose yet remain
- * log-once gaps — `@platform ios` in the TS surface (plan §6.2), tracked as
+ * log-once gaps — `@platform ios` in the TS surface (plan §4), tracked as
  * upstream asks on galva-android.
  */
 class GalvaModule(reactContext: ReactApplicationContext) :
@@ -52,10 +52,10 @@ class GalvaModule(reactContext: ReactApplicationContext) :
   private var streamJob: Job? = null
   private var listenerCount = 0
 
-  /** Log each unbacked method once so the missing backing is visible (§6.2). */
+  /** Log each unbacked method once so the missing backing is visible (plan §4). */
   private fun gap(method: String) {
     if (warned.add(method)) {
-      Log.w(NAME, "$method(): not exposed by the Android core yet — call is a no-op (plan §6.2).")
+      Log.w(NAME, "$method(): not exposed by the Android core yet — call is a no-op (plan §4).")
     }
   }
 
@@ -125,7 +125,7 @@ class GalvaModule(reactContext: ReactApplicationContext) :
   fun identify(userId: String, appAccountToken: String?) {
     // iOS links purchases via the StoreKit appAccountToken (UUID); the Android
     // core's nearest primitive is the Play obfuscatedAccountId. Semantics
-    // equivalence is an open upstream question (plan §6.2).
+    // equivalence is an open upstream question (plan §4).
     Galva.instance.identify(userId, email = null, obfuscatedAccountId = appAccountToken)
   }
 
@@ -275,7 +275,7 @@ class GalvaModule(reactContext: ReactApplicationContext) :
         val body = Arguments.createMap().apply {
           putString("id", message.id)
           // The Android core's Message carries only `id` (no createdAt /
-          // rawType / workflowType yet — upstream ask §6.2): stamp receipt
+          // rawType / workflowType yet — upstream ask — plan §4): stamp receipt
           // time; JS already treats workflowType as optional.
           putDouble("createdAt", System.currentTimeMillis().toDouble())
           putString("rawType", "")

@@ -7,7 +7,7 @@ import type { InAppMessage, WorkflowType } from '../types';
  * The SDK publishes the winning message after each foreground poll. Render a
  * message by passing its `id` to {@link show}.
  *
- * Firebase-style emitter (plan §6.1): returns a plain `unsubscribe` function.
+ * Firebase-style emitter (plan §4): returns a plain `unsubscribe` function.
  *
  * ```ts
  * const unsubscribe = messages((message) => {

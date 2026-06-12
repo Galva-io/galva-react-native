@@ -21,7 +21,7 @@ export type GalvaPluginProps = {
   push?: boolean;
 };
 
-/** Galva's native floors (plan §3.3/§3.7). Never lowers an existing value. */
+/** Galva's native floors (plan §3.5/§3.6). Never lowers an existing value. */
 const IOS_DEPLOYMENT_TARGET = 15.0;
 const ANDROID_MIN_SDK = 24;
 

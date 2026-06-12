@@ -103,7 +103,7 @@ via the `prepare` script; scoped-package access is `public`).
   GitHub release and an authenticated npm session).
 - Update `CHANGELOG.md` (move `Unreleased` into the new version section) as
   part of the release.
-- **First-publish gate** (plan §7 Phase 3): hold `0.1.0` until `galva-ios`
+- **First-publish gate** (plan §8): hold `0.1.0` until `galva-ios`
   cuts its first release tag — then re-pin the vendored core by tag
   (`scripts/sync-galva.sh <tag>`) before releasing.
 

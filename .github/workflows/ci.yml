@@ -45,7 +45,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       # Re-vendor galva-ios at the locked commit, then assert the committed
-      # tree is byte-identical (plan §3.4.1 / §8). Catches hand-edits to
+      # tree is byte-identical (plan §3.3 / §7). Catches hand-edits to
       # ios/galva-src and upstream Package.swift settings drift (the .ref file
       # lives inside the diffed tree). A guard, not automation — it verifies
       # the pin, it never bumps it.

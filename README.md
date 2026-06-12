@@ -11,15 +11,15 @@ npm install @galva/react-native
 cd ios && pod install
 ```
 
-No other native setup: the iOS pod autolinks and links statically (no `use_frameworks!`, no Podfile edit). The first-party Galva iOS core is vendored in the package and compiled inside the pod — see [`galva-rn-sdk-plan.md`](galva-rn-sdk-plan.md) §3.4.
+No other native setup: the iOS pod autolinks and links statically (no `use_frameworks!`, no Podfile edit). The first-party Galva iOS core is vendored in the package and compiled inside the pod — see [`galva-rn-sdk-plan.md`](galva-rn-sdk-plan.md) §3.2.
 
 ### Requirements
 
 | | |
 |---|---|
-| React Native | no declared floor — verified on **0.85 (New Arch)** and **0.70 (Old Arch)**; RN ≤ 0.70 needs era-specific consumer patches (Flipper off, an empty `.swift` file in ObjC-only apps, …— see [plan §7 Phase 0](galva-rn-sdk-plan.md)); RN ≤ 0.6x is not buildable on 2026 toolchains at all |
+| React Native | no declared floor — verified on **0.85 (New Arch)** and **0.70 (Old Arch)**; RN ≤ 0.70 needs era-specific consumer patches (Flipper off, an empty `.swift` file in ObjC-only apps, …— see [plan §6](galva-rn-sdk-plan.md)); RN ≤ 0.6x is not buildable on 2026 toolchains at all |
 | iOS | deployment target ≥ 15.0, **Xcode 26+** (the core is Swift 6 and uses an iOS 26 SDK symbol) |
-| Android | minSdk 24 — **stub by default**: the Galva Android core is unreleased (`1.0.0-SNAPSHOT`), so calls no-op/reject. Real core wiring exists behind the `Galva_androidCore=true` Gradle property (dev-only, needs the core on mavenLocal) and becomes the default when `io.galva.sdk:galva-sdk:1.0.0` ships ([plan §3.7](galva-rn-sdk-plan.md)) |
+| Android | minSdk 24 — **stub by default**: the Galva Android core is unreleased (`1.0.0-SNAPSHOT`), so calls no-op/reject. Real core wiring exists behind the `Galva_androidCore=true` Gradle property (dev-only, needs the core on mavenLocal) and becomes the default when `io.galva.sdk:galva-sdk:1.0.0` ships ([plan §3.6](galva-rn-sdk-plan.md)) |
 | Expo | supported via a **development build** (`expo-dev-client`); Expo Go is not supported (custom native code). Add the config plugin: `"plugins": ["@galva/react-native"]` in `app.json` — injects the push entitlement + `UIBackgroundModes` (iOS) and `POST_NOTIFICATIONS` (Android); pass `{ "push": false }` to opt out |
 
 ## Usage

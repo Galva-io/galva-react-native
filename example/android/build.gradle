@@ -20,7 +20,7 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 
-// Dev-only (plan §3.7): with `Galva_androidCore=true` the library pulls the
+// Dev-only (plan §3.6): with `Galva_androidCore=true` the library pulls the
 // unreleased io.galva.sdk:galva-sdk SNAPSHOT — resolvable only from a local
 // publish (`publishToMavenLocal` in galva-android). Every project resolving
 // the app's classpath needs the repo, hence allprojects.

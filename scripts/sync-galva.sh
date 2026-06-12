@@ -9,7 +9,7 @@
 #         Defaults to the `ref` already recorded in galva.lock.json, or "main"
 #         if no lock exists yet.
 #
-# What it does (see plan §3.4.1):
+# What it does (see plan §3.3):
 #   1. Shallow-fetches galva-ios @ ref (public repo — NO auth).
 #   2. Copies Sources/ + LICENSE into ios/galva-src/ (the compiled source).
 #   3. Copies Package.swift into ios/galva-src/Package.swift.ref (NOT compiled —
@@ -57,12 +57,12 @@ fi
 SRC="$TMP/galva-ios"
 COMMIT="$(git -C "$SRC" rev-parse HEAD)"
 
-# Sanity: the source must be self-contained (plan §3.4 audit). Bail if a
+# Sanity: the source must be self-contained (plan §2 audit). Bail if a
 # Package.swift suddenly declares dependencies or bundles resources.
 if grep -qE 'dependencies:\s*\[[^]]*\.package' "$SRC/Package.swift"; then
   echo "✗ galva-ios Package.swift now declares SwiftPM dependencies — the podspec"
   echo "  vendors source only and cannot resolve transitive SPM deps. Aborting."
-  echo "  (Revisit the distribution strategy — see plan §3.4 / §3.7.)"
+  echo "  (Revisit the distribution strategy — see plan §3.2 / §3.6.)"
   exit 1
 fi
 

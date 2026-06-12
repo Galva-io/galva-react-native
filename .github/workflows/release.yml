@@ -7,7 +7,7 @@ name: Release
 # Prerequisites (one-time):
 #   - `NPM_TOKEN` repo secret: npm automation token with publish rights for
 #     the @galva scope.
-#   - First publish gate (plan §7 Phase 3): hold until galva-ios cuts its
+#   - First publish gate (plan §8): hold until galva-ios cuts its
 #     first release tag, then re-pin the vendored core by tag beforehand.
 on:
   workflow_dispatch:

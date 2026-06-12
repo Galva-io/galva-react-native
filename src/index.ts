@@ -1,4 +1,4 @@
-// PUBLIC ENTRY — re-export ONLY, one line per api/* export (plan §5).
+// PUBLIC ENTRY — re-export ONLY, one line per api/* export (plan §4).
 // This is the single sanctioned barrel; keep it re-export-only with
 // "sideEffects": false so bundlers tree-shake unused exports. Internal code
 // must import from the source path, never through this file.

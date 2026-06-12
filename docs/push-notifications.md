@@ -12,7 +12,7 @@ needs to be told the token. Two calls are involved:
 | `setCommunicationPreference({ channel: 'pushNotification', … })` | User-level channel preference (disable entirely or per category). |
 
 > **Platform status:** fully backed on iOS. On Android the SDK is a stub until
-> the Galva Android core ships `1.0.0` ([plan §3.7](../galva-rn-sdk-plan.md)) —
+> the Galva Android core ships `1.0.0` ([plan §3.6](../galva-rn-sdk-plan.md)) —
 > calls no-op with a one-time warning, so it is safe to wire FCM now.
 
 ## 1. Bare React Native — iOS (APNs)
