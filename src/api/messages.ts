@@ -11,7 +11,7 @@ import type { InAppMessage, WorkflowType } from '../types';
  *
  * ```ts
  * const unsubscribe = messages((message) => {
- *   void show(message.id);
+ *   show(message.id);
  * });
  * // later
  * unsubscribe();

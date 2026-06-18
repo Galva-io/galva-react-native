@@ -102,11 +102,34 @@ Rule: iOS is canonical; Android-missing methods stay in the surface as logged st
 
 **Upstream asks for galva-android:** event tracking; opt-out; email endpoints + preference API; `reconcileTransactions`; token-addressed push unregister; `Message` metadata; trait-key normalization; appAccountToken semantics; POM fixes (lifecycle-process version, test-lib leaks, coroutines scope); publish a BOM.
 
+### React-first convenience layer (components + hooks) — *designed, not yet built*
+
+The 23 flat functions stay the canonical surface; this is an **additive** layer on top so a React dev wires nothing by hand. Goal: fastest integration, fewest lines, React/RN-idiomatic — mirroring Galva-SwiftUI's view-modifier ergonomics (`.autoDisplayInAppMessages()`, `.inAppMessageSheet($message)`, the `InAppMessages.messages` stream). **Root export** (same barrel — an RN app always has React; components are pure modules so `sideEffects:false` + tree-shaking still hold). It does **not** replace the functions: filtering / manual control drop down to them.
+
+Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `messages` + `show`) → after:
+
+```tsx
+<Galva apiKey="gv_pub_xxx">
+  <App />
+  <InAppMessageAutoShow />
+</Galva>
+```
+
+| Member | Maps to (SwiftUI) | Behavior |
+|---|---|---|
+| `<Galva apiKey … environment? logLevel? autoTrackLifecycle?>` | top-level `configure` | calls `configure()` once on mount; **pure side-effect wrapper, no React Context** (the native singleton is the source of truth — re-configure is a native no-op). Renders `children` unchanged. |
+| `<InAppMessageAutoShow filter? />` | `.autoDisplayInAppMessages()` | wires `messages()` → `show(m.id)`, auto-unsubscribes on unmount. Optional `filter: (m) => boolean` covers the "don't show these" advanced case without leaving the component. |
+| `useInAppMessages(handler)` | `.inAppMessageSheet($message)` / `InAppMessages.messages` | hook form of `messages()`; auto-unsub. The controlled path — caller decides when to `show()`. |
+| `useGalvaUser()` → `{ userId, isAnonymous, loading, refresh() }` | identity reads | `await`s `identifiedUserId()` + `isAnonymous()` **once** on mount into state — **no native event needed**; `refresh()` re-reads after `identify()`/`logout()` (identity is eventually consistent, §4 — refresh on the next tick). |
+
+**Fire-and-forget cleanup (paired with this layer):** `show()` flips `Promise<void>` → **`void`** (native logs `BUNDLE_UNAVAILABLE`/`MESSAGE_NOT_FOUND`/… instead of rejecting) so the write surface is uniformly fire-and-forget per the §4 contract. Audit: **15/16 write functions are already `void`; only `show` changes.** The 5 genuine **queries** (`identifiedUserId`, `isAnonymous`, `isOptedOut`, `isValidEmail`, `sdkVersion`) keep returning Promises — they return data; React consumers reach them through hooks (`useGalvaUser`, …), not raw `await` in effects. `parity-check` is unaffected (JS-only, no new native methods).
+
 ## 5. Repo layout
 
 ```
 src/index.ts          # the one sanctioned barrel — re-export only
 src/api/*             # 23 files, one export each (tree-shakeable)
+src/react/*           # React layer (§4): <Galva>, <InAppMessageAutoShow>, useInAppMessages, useGalvaUser — re-exported by the same barrel
 src/NativeBridge.ts   # NativeModules + emitter wiring (internal)
 Galva.podspec         # repo ROOT, filename = s.name (§3.2)
 ios/bridge/           # GalvaModule.swift + .m (RCT_EXTERN_REMAP_MODULE)
@@ -148,6 +171,7 @@ Android core-toggle legs re-verified 2026-06-12 (`examples-compat/README.md` §4
 | **First publish `0.1.0`**: re-pin the core by tag (`sync-galva.sh <tag>`) → Release workflow with exact version `0.1.0` | galva-ios's first release tag |
 | Flip `Galva_androidCore` default, pin version, drop mavenLocal, re-verify; settle `billing` | galva-android `1.0.0` on Maven Central |
 | File the §4 upstream asks as galva-android issues | — (just do it) |
+| Ship the React-first layer (§4): `<Galva>`, `<InAppMessageAutoShow>`, `useInAppMessages`, `useGalvaUser` + flip `show()` → `void`; update `example/`, docs, tests | — (just do it) |
 | Rotate galva-android's leaked publishing secrets | upstream team — **blocks any Android release** |
 | Optional: dedicated `expo-dev-client` flow test; weekly core-drift watch job | nice-to-have |
 

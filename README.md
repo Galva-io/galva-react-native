@@ -24,32 +24,49 @@ No other native setup: the iOS pod autolinks and links statically (no `use_frame
 
 ## Usage
 
+Wrap your app in `<Galva>` (configures the SDK once) and drop in
+`<InAppMessageAutoShow />` to render any message the backend serves — that's the
+whole integration:
+
+```tsx
+import { Galva, InAppMessageAutoShow } from '@galva/react-native';
+
+export default function App() {
+  return (
+    <Galva apiKey="gv_pub_xxx">
+      <YourApp />
+      <InAppMessageAutoShow />
+    </Galva>
+  );
+}
+```
+
+Then call the flat functions anywhere — they're fire-and-forget (return
+synchronously; the native core queues, persists to SQLite, and uploads in the
+background with retry, so events survive crashes and offline periods):
+
 ```ts
-import {
-  configure,
-  identify,
-  track,
-  messages,
-  show,
-} from '@galva/react-native';
+import { identify, track } from '@galva/react-native';
 
-// Once, at app launch:
-configure({ apiKey: 'gv_pub_xxx' });
-
-// Identity
 identify('user_42', { appAccountToken: '8e0f7c2a-…' }); // token links StoreKit purchases
 track('AddHabitButtonTapped');
 track('Purchase', { sku: 'pro_yearly', price: 9.99 });
-
-// In-app messages: subscribe, then render by id
-const unsubscribe = messages((message) => {
-  show(message.id); // SDK presents a managed WebView sheet
-});
-// later
-unsubscribe();
 ```
 
-All write APIs are fire-and-forget: they return synchronously and the native core queues, persists (SQLite), and uploads in the background with retry — events survive crashes and offline periods.
+Read identity reactively with the `useGalvaUser()` hook, and take manual control
+of message presentation (filtering, custom UI) with `useInAppMessages()`:
+
+```tsx
+import { useGalvaUser, useInAppMessages, show } from '@galva/react-native';
+
+function Profile() {
+  const { userId, isAnonymous, loading } = useGalvaUser();
+  useInAppMessages((message) => {
+    if (message.workflowType !== 'trial-rescue') show(message.id); // your rule
+  });
+  // …
+}
+```
 
 ### API
 
@@ -60,6 +77,11 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 - **User** — `identify`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`
 - **Communication endpoints** — `registerEmail`, `unregisterEmail`, `registerPushToken`, `unregisterPushToken`, `setCommunicationPreference`, `isValidEmail`
 - **In-app messages** — `messages` (emitter; returns an `unsubscribe` function), `show`, `checkForMessages`
+
+Plus a React-first layer over the same surface:
+
+- **Components** — `<Galva>` (provider; configures on mount), `<InAppMessageAutoShow>` (auto-renders served messages; optional `filter` prop)
+- **Hooks** — `useGalvaUser()` (reactive identity: `{ userId, isAnonymous, loading, refresh }`), `useInAppMessages(handler)` (subscribe for a component's lifetime)
 
 Each export carries full TSDoc; types (`GalvaConfig`, `InAppMessage`, …) are exported from the package root.
 

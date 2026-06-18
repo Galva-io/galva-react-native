@@ -27,6 +27,17 @@ export { show } from './api/show';
 export { checkForMessages } from './api/checkForMessages';
 export { sdkVersion } from './api/sdkVersion';
 
+// React-first layer (plan §4) — additive convenience over the flat functions
+// above. Path is './react/*', not './api/*', so parity-check ignores it.
+export { Galva } from './react/Galva';
+export { InAppMessageAutoShow } from './react/InAppMessageAutoShow';
+export { useInAppMessages } from './react/useInAppMessages';
+export { useGalvaUser } from './react/useGalvaUser';
+
+export type { GalvaProps } from './react/Galva';
+export type { InAppMessageAutoShowProps } from './react/InAppMessageAutoShow';
+export type { GalvaUser } from './react/useGalvaUser';
+
 export type {
   CommunicationChannel,
   CommunicationPreference,
