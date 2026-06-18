@@ -12,6 +12,7 @@ export { isAnonymous } from './api/isAnonymous';
 export { setEmail } from './api/setEmail';
 export { setDisplayName } from './api/setDisplayName';
 export { setUserProperty } from './api/setUserProperty';
+export { setUserProperties } from './api/setUserProperties';
 export { setOptOut } from './api/setOptOut';
 export { isOptedOut } from './api/isOptedOut';
 export { setDeviceToken } from './api/setDeviceToken';

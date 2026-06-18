@@ -76,7 +76,7 @@ Legacy-RN support in `android/build.gradle`: RN < 0.71 has no `com.facebook.reac
 
 **When `1.0.0` ships on Maven Central:** flip the toggle default, pin the exact version, drop mavenLocal, re-verify, settle the `billing` surface.
 
-## 4. API surface — 23 flat exports, iOS-canonical
+## 4. API surface — 24 flat exports, iOS-canonical
 
 Style (plan-locked): **flat named exports** (lodash-es style), one function per `src/api/*` file, re-exported by the single sanctioned barrel `src/index.ts` (re-export only, `sideEffects: false`); no default export, no namespace object; emitters are Firebase-style subscribe functions returning `unsubscribe()`.
 
@@ -84,7 +84,7 @@ The surface is transcribed 1:1 from the **real** iOS facade:
 
 - **Setup/global** — `configure({apiKey, environment?, autoTrackLifecycle?, logLevel?})`, `setOptOut`, `isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `sdkVersion`
 - **Events** — `track(name, attributes?)`
-- **User** — `identify(userId, {appAccountToken?})`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`
+- **User** — `identify(userId, {appAccountToken?})`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`, `setUserProperties(props)` (bulk; mirrors iOS `AppUser.set([String:Any])`)
 - **Communication** — `isValidEmail`, `registerEmail`, `unregisterEmail`, `registerPushToken(token, 'apns'|'fcm')`, `unregisterPushToken`, `setCommunicationPreference({channel, disabled?, categories?})`
 - **In-app messages** — `messages(listener)` (emitter), `show(messageId)` (rejects `NOT_CONFIGURED`/`MESSAGE_NOT_FOUND`/`BUNDLE_UNAVAILABLE`/`BRIDGE_PROTOCOL_MISMATCH`/`NO_ACTIVE_SCENE`), `checkForMessages`
 
@@ -95,7 +95,7 @@ Behavioral notes: all write APIs are fire-and-forget (native core queues + persi
 | Bucket | Methods | Notes |
 |---|---|---|
 | **A** — direct | `configure`, `identify`, `logout`, `isAnonymous`, `messages`, `show`, `registerPushToken` | configure forces env default to Production (core's default is Development); `appAccountToken` → `obfuscatedAccountId` (semantics = upstream question); `Message` carries only `id` → `createdAt` stamped at receipt, `rawType`/`workflowType` empty |
-| **B** — shimmed | `identifiedUserId` (core falls back to anonymousId → bridge returns `null` when anonymous), `unregisterPushToken` (core clears *current* token only), `setEmail`/`setDisplayName`/`setUserProperty` (→ `updateProperties(ProfileProperty…)`; trait-key conventions diverge: Android `"email"` vs iOS `"$gv_email"`), `sdkVersion` (BuildConfig), `isValidEmail` (local regex), `checkForMessages` (no-op — Android IAM is a reactive Flow) |
+| **B** — shimmed | `identifiedUserId` (core falls back to anonymousId → bridge returns `null` when anonymous), `unregisterPushToken` (core clears *current* token only), `setEmail`/`setDisplayName`/`setUserProperty`/`setUserProperties` (→ `updateProperties(ProfileProperty…)`; the bulk variant loops per entry; trait-key conventions diverge: Android `"email"` vs iOS `"$gv_email"`), `sdkVersion` (BuildConfig), `isValidEmail` (local regex), `checkForMessages` (no-op — Android IAM is a reactive Flow) |
 | **C** — no backing (log-once gap) | **`track`** (core has NO event API — top ask), `setOptOut`/`isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `registerEmail`/`unregisterEmail`, `setCommunicationPreference` |
 
 Rule: iOS is canonical; Android-missing methods stay in the surface as logged stubs. A method missing on a platform must carry a JSDoc **`@platform`** tag or `parity-check` fails the build. `billing` (`@platform android`, backed by the core's `BillingManager`, rejected on iOS) is the planned first Android-only member — deferred until core integration.
@@ -104,7 +104,7 @@ Rule: iOS is canonical; Android-missing methods stay in the surface as logged st
 
 ### React-first convenience layer (components + hooks) — *designed, not yet built*
 
-The 23 flat functions stay the canonical surface; this is an **additive** layer on top so a React dev wires nothing by hand. Goal: fastest integration, fewest lines, React/RN-idiomatic — mirroring Galva-SwiftUI's view-modifier ergonomics (`.autoDisplayInAppMessages()`, `.inAppMessageSheet($message)`, the `InAppMessages.messages` stream). **Root export** (same barrel — an RN app always has React; components are pure modules so `sideEffects:false` + tree-shaking still hold). It does **not** replace the functions: filtering / manual control drop down to them.
+The 24 flat functions stay the canonical surface; this is an **additive** layer on top so a React dev wires nothing by hand. Goal: fastest integration, fewest lines, React/RN-idiomatic — mirroring Galva-SwiftUI's view-modifier ergonomics (`.autoDisplayInAppMessages()`, `.inAppMessageSheet($message)`, the `InAppMessages.messages` stream). **Root export** (same barrel — an RN app always has React; components are pure modules so `sideEffects:false` + tree-shaking still hold). It does **not** replace the functions: filtering / manual control drop down to them.
 
 Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `messages` + `show`) → after:
 
@@ -128,7 +128,7 @@ Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `messa
 
 ```
 src/index.ts          # the one sanctioned barrel — re-export only
-src/api/*             # 23 files, one export each (tree-shakeable)
+src/api/*             # 24 files, one export each (tree-shakeable)
 src/react/*           # React layer (§4): <Galva>, <InAppMessageAutoShow>, useInAppMessages, useGalvaUser — re-exported by the same barrel
 src/NativeBridge.ts   # NativeModules + emitter wiring (internal)
 Galva.podspec         # repo ROOT, filename = s.name (§3.2)

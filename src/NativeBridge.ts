@@ -42,6 +42,7 @@ type GalvaNativeModule = {
   setEmail(email: string): void;
   setDisplayName(name: string): void;
   setUserProperty(key: string, value: UserPropertyValue): void;
+  setUserProperties(properties: Record<string, UserPropertyValue>): void;
   isValidEmail(email: string): Promise<boolean>;
   registerEmail(email: string): void;
   unregisterEmail(email: string): void;

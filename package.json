@@ -65,7 +65,7 @@
   "homepage": "https://github.com/Galva-io/galva-react-native#readme",
   "galva": {
     "iosCoreRef": "main",
-    "iosCoreCommit": "95c86a1cbfa1082608bb502eab4e6c9358a014a9"
+    "iosCoreCommit": "5be87143c28d5e06efd152a0126c3ca9ae72e684"
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/",

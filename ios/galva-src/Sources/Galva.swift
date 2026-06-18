@@ -488,31 +488,31 @@ public enum AppUserTraits {
     /// Email trait. Server key: `$gv_email`.
     public struct Email: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_email"
+        public let attributeName = BuiltInTraitKey.email
     }
 
     /// Full-name trait. Server key: `$gv_fullName`.
     public struct FullName: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_fullName"
+        public let attributeName = BuiltInTraitKey.fullName
     }
 
     /// First-name trait. Server key: `$gv_firstName`.
     public struct FirstName: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_firstName"
+        public let attributeName = BuiltInTraitKey.firstName
     }
 
     /// Last-name trait. Server key: `$gv_lastName`.
     public struct LastName: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_lastName"
+        public let attributeName = BuiltInTraitKey.lastName
     }
 
     /// Country trait (ISO 3166 alpha-2). Server key: `$gv_country`.
     public struct Country: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_country"
+        public let attributeName = BuiltInTraitKey.country
     }
 
     /// Timezone trait (IANA name). Server key: `$gv_timezone`.
@@ -520,7 +520,7 @@ public enum AppUserTraits {
     /// only to override (e.g. host app exposes its own picker).
     public struct Timezone: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_timezone"
+        public let attributeName = BuiltInTraitKey.timezone
     }
 
     /// Language code trait (BCP 47 tag). Server key: `$gv_languageCode`.
@@ -528,14 +528,14 @@ public enum AppUserTraits {
     /// only to override.
     public struct LanguageCode: Sendable, AppUserAttribute {
         public typealias Value = String
-        public let attributeName = "$gv_languageCode"
+        public let attributeName = BuiltInTraitKey.languageCode
     }
 
     /// Total lifetime value trait (currency, `Double`).
     /// Server key: `$gv_totalLifetimeValue`.
     public struct TotalLifetimeValue: Sendable, AppUserAttribute {
         public typealias Value = Double
-        public let attributeName = "$gv_totalLifetimeValue"
+        public let attributeName = BuiltInTraitKey.totalLifetimeValue
     }
 }
 
@@ -640,6 +640,46 @@ public enum AppUser {
         let trait = [attributeName: AnyJSONValue(value)]
         Task { @GalvaActor in
             await SDKCore.shared.identify(userId: nil, appAccountToken: nil, traits: trait)
+        }
+    }
+
+    /// Set one or more user traits from a loose `[String: Any]` dictionary
+    /// — the lenient mirror of `AppEvents.track(_:attributes:)`.
+    ///
+    /// Use this when the values come from an untyped source (a JSON parse,
+    /// `UserDefaults.dictionaryRepresentation()`, a host-side `[String: Any]`
+    /// payload). Foundation-bridged values (`NSString`, `NSNumber`, `NSNull`,
+    /// nested `NSDictionary` / `NSArray`) flow through cleanly so a host
+    /// doesn't have to bridge each value to its Swift equivalent first — a
+    /// failed bridge there is exactly the path that silently drops traits
+    /// at the call site (e.g. an email read as `NSString` cast through a
+    /// non-`@objc` protocol type ends up `nil`).
+    ///
+    /// Same rules as `AppEvents.track` for what survives the coercion:
+    ///   • Kept: `String`, `Bool`, `Int`/`Int64`, `Double`/`Float`, `Decimal`,
+    ///     `Date`, `URL`, `UUID`, any custom `Codable` `GalvaCompatibleValue`,
+    ///     `NSNumber`/`NSString`/`NSNull`, and nested arrays/dictionaries of
+    ///     those.
+    ///   • Dropped: custom classes, closures, and other non-JSON values.
+    ///
+    /// Example:
+    ///
+    ///     // Reading what the host already has lying around as `[String: Any]`:
+    ///     let stored = UserDefaults.standard.dictionaryRepresentation()
+    ///     AppUser.set([
+    ///         "$gv_email":    stored["email"]    ?? NSNull(),  // NSString → ok
+    ///         "$gv_country":  stored["country"]  ?? NSNull(),
+    ///         "plan_tier":    stored["plan"]     ?? NSNull(),
+    ///     ])
+    public static func set(_ attributes: [String: Any]) {
+        let coerced = AnyJSONValue.coercing(dictionary: attributes)
+        guard !coerced.isEmpty else { return }
+        Task { @GalvaActor in
+            await SDKCore.shared.identify(
+                userId: nil,
+                appAccountToken: nil,
+                traits: coerced
+            )
         }
     }
 

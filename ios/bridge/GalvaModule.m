@@ -48,6 +48,8 @@ RCT_EXTERN_METHOD(setDisplayName:(NSString *)name)
 RCT_EXTERN_METHOD(setUserProperty:(NSString *)key
                   withValue:(id)value)
 
+RCT_EXTERN_METHOD(setUserProperties:(NSDictionary *)properties)
+
 // --- Communication ------------------------------------------------------------
 
 RCT_EXTERN_METHOD(isValidEmail:(NSString *)email

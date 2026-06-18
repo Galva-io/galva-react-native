@@ -175,6 +175,12 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
     }
   }
 
+  @objc(setUserProperties:)
+  func setUserProperties(_ properties: NSDictionary) {
+    // Bulk trait set; the core coerces each value (lenient mirror of `track`).
+    AppUser.set(properties as? [String: Any] ?? [:])
+  }
+
   // MARK: - Communication
 
   @objc(isValidEmail:withResolver:withRejecter:)

@@ -74,7 +74,7 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 
 - **Setup / global** — `configure`, `setOptOut`, `isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `sdkVersion`
 - **Events** — `track`
-- **User** — `identify`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`
+- **User** — `identify`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`, `setUserProperties` (bulk)
 - **Communication endpoints** — `registerEmail`, `unregisterEmail`, `registerPushToken`, `unregisterPushToken`, `setCommunicationPreference`, `isValidEmail`
 - **In-app messages** — `messages` (emitter; returns an `unsubscribe` function), `show`, `checkForMessages`
 

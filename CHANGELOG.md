@@ -16,10 +16,14 @@ releases and npm publishing — update this file as part of the release PR.
   Old and New Architecture, no React Native version floor declared. Verified
   on RN 0.70 (Old Arch, with documented consumer patches), RN 0.85 (New Arch),
   Expo SDK 54 (Old Arch) and SDK 56 (New Arch) — see `examples-compat/`.
-- Flat, tree-shakeable API surface (23 named exports): configure, track,
-  identity (identify/logout/identifiedUserId/isAnonymous), user traits,
-  communication endpoints (email + push tokens, preferences) and in-app
-  messages (`messages` emitter + `show`).
+- Flat, tree-shakeable API surface (24 named exports): configure, track,
+  identity (identify/logout/identifiedUserId/isAnonymous), user traits
+  (`setUserProperty` + bulk `setUserProperties`), communication endpoints
+  (email + push tokens, preferences) and in-app messages (`messages`
+  emitter + `show`).
+- React-first layer over the same surface: `<Galva>` provider (configures on
+  mount), `<InAppMessageAutoShow>` (auto-renders served messages, optional
+  `filter`), and the `useGalvaUser()` / `useInAppMessages()` hooks.
 - Android module with two source sets: full-surface stub (default, the
   Android core is unreleased) and real core wiring behind the
   `Galva_androidCore=true` Gradle property.
@@ -29,3 +33,16 @@ releases and npm publishing — update this file as part of the release PR.
 - Integration guides (`docs/`): push notifications, Expo, legacy React Native.
 - CI: lint + parity-check (JS surface ↔ all native bridges), library build,
   vendored-source drift guard, Android & iOS example builds.
+
+### Changed
+
+- `show()` is now fire-and-forget (returns `void`): a failed render is logged
+  natively instead of rejecting a promise, making the write surface uniformly
+  fire-and-forget.
+- Re-synced the vendored iOS core to `main` HEAD
+  (`5be87143c28d5e06efd152a0126c3ca9ae72e684`): adds the `AppUser.set(_:)`
+  bulk-trait API (surfaced as `setUserProperties`), splits the in-message
+  WebView bridge into richer capabilities (API fetch, open-URL, page context,
+  purchases, native alerts), and **disables swipe-to-dismiss on the in-app
+  message sheet** — the message's own CTA / `galva.dismiss()` is now the only
+  way to close it.

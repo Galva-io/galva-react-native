@@ -99,6 +99,9 @@ class GalvaModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun setUserProperty(key: String, value: Dynamic) = stub("setUserProperty")
 
+  @ReactMethod
+  fun setUserProperties(properties: ReadableMap) = stub("setUserProperties")
+
   // --- Communication ------------------------------------------------------------
 
   @ReactMethod

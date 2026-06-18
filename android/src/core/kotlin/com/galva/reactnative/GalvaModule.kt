@@ -178,6 +178,25 @@ class GalvaModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun setUserProperties(properties: ReadableMap) {
+    // Bulk trait set: convert each JSON-clean value and forward to the core,
+    // mirroring setUserProperty per entry (the iOS core coerces in one call).
+    val iterator = properties.keySetIterator()
+    while (iterator.hasNextKey()) {
+      val key = iterator.nextKey()
+      val converted: Any? = when (properties.getType(key)) {
+        ReadableType.Boolean -> properties.getBoolean(key)
+        ReadableType.Number -> properties.getDouble(key)
+        ReadableType.String -> properties.getString(key)
+        else -> null
+      }
+      if (converted != null) {
+        Galva.instance.updateProperties(ProfileProperty.Custom(key, converted))
+      }
+    }
+  }
+
   // --- Communication ------------------------------------------------------------
 
   @ReactMethod
