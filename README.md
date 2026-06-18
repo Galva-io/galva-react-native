@@ -53,14 +53,14 @@ track('AddHabitButtonTapped');
 track('Purchase', { sku: 'pro_yearly', price: 9.99 });
 ```
 
-Read identity reactively with the `useGalvaUser()` hook, and take manual control
-of message presentation (filtering, custom UI) with `useInAppMessages()`:
+Take manual control of message presentation (filtering, custom UI) with the
+`useInAppMessages()` hook — it subscribes for the component's lifetime and
+auto-unsubscribes on unmount:
 
 ```tsx
-import { useGalvaUser, useInAppMessages, show } from '@galva/react-native';
+import { useInAppMessages, show } from '@galva/react-native';
 
-function Profile() {
-  const { userId, isAnonymous, loading } = useGalvaUser();
+function Screen() {
   useInAppMessages((message) => {
     if (message.workflowType !== 'trial-rescue') show(message.id); // your rule
   });
@@ -81,7 +81,7 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 Plus a React-first layer over the same surface:
 
 - **Components** — `<Galva>` (provider; configures on mount), `<InAppMessageAutoShow>` (auto-renders served messages; optional `filter` prop)
-- **Hooks** — `useGalvaUser()` (reactive identity: `{ userId, isAnonymous, loading, refresh }`), `useInAppMessages(handler)` (subscribe for a component's lifetime)
+- **Hooks** — `useInAppMessages(handler)` (subscribe to in-app messages for a component's lifetime; auto-unsubscribes on unmount)
 
 Each export carries full TSDoc; types (`GalvaConfig`, `InAppMessage`, …) are exported from the package root.
 

@@ -33,11 +33,9 @@ export { sdkVersion } from './api/sdkVersion';
 export { Galva } from './react/Galva';
 export { InAppMessageAutoShow } from './react/InAppMessageAutoShow';
 export { useInAppMessages } from './react/useInAppMessages';
-export { useGalvaUser } from './react/useGalvaUser';
 
 export type { GalvaProps } from './react/Galva';
 export type { InAppMessageAutoShowProps } from './react/InAppMessageAutoShow';
-export type { GalvaUser } from './react/useGalvaUser';
 
 export type {
   CommunicationChannel,
