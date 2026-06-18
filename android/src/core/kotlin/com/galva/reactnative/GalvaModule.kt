@@ -180,8 +180,11 @@ class GalvaModule(reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun setUserProperties(properties: ReadableMap) {
-    // Bulk trait set: convert each JSON-clean value and forward to the core,
-    // mirroring setUserProperty per entry (the iOS core coerces in one call).
+    // Bulk trait set in ONE update — the core's updateProperties is vararg
+    // (→ a single GalvaEvent.UpdateProperties(List)), matching iOS's single
+    // AppUser.set([String:Any]) call. Convert each JSON-clean value; anything
+    // else is dropped (mirrors setUserProperty).
+    val props = mutableListOf<ProfileProperty>()
     val iterator = properties.keySetIterator()
     while (iterator.hasNextKey()) {
       val key = iterator.nextKey()
@@ -192,8 +195,11 @@ class GalvaModule(reactContext: ReactApplicationContext) :
         else -> null
       }
       if (converted != null) {
-        Galva.instance.updateProperties(ProfileProperty.Custom(key, converted))
+        props.add(ProfileProperty.Custom(key, converted))
       }
+    }
+    if (props.isNotEmpty()) {
+      Galva.instance.updateProperties(*props.toTypedArray())
     }
   }
 
