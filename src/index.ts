@@ -23,7 +23,7 @@ export { unregisterEmail } from './api/unregisterEmail';
 export { registerPushToken } from './api/registerPushToken';
 export { unregisterPushToken } from './api/unregisterPushToken';
 export { setCommunicationPreference } from './api/setCommunicationPreference';
-export { messages } from './api/messages';
+export { onMessage } from './api/onMessage';
 export { show } from './api/show';
 export { checkForMessages } from './api/checkForMessages';
 export { sdkVersion } from './api/sdkVersion';

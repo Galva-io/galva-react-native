@@ -86,7 +86,7 @@ The surface is transcribed 1:1 from the **real** iOS facade:
 - **Events** — `track(name, attributes?)`
 - **User** — `identify(userId, {appAccountToken?})`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`, `setUserProperties(props)` (bulk; mirrors iOS `AppUser.set([String:Any])`)
 - **Communication** — `isValidEmail`, `registerEmail`, `unregisterEmail`, `registerPushToken(token, 'apns'|'fcm')`, `unregisterPushToken`, `setCommunicationPreference({channel, disabled?, categories?})`
-- **In-app messages** — `messages(listener)` (emitter), `show(messageId)` (rejects `NOT_CONFIGURED`/`MESSAGE_NOT_FOUND`/`BUNDLE_UNAVAILABLE`/`BRIDGE_PROTOCOL_MISMATCH`/`NO_ACTIVE_SCENE`), `checkForMessages`
+- **In-app messages** — `onMessage(listener)` (emitter), `show(messageId)` (rejects `NOT_CONFIGURED`/`MESSAGE_NOT_FOUND`/`BUNDLE_UNAVAILABLE`/`BRIDGE_PROTOCOL_MISMATCH`/`NO_ACTIVE_SCENE`), `checkForMessages`
 
 Behavioral notes: all write APIs are fire-and-forget (native core queues + persists in SQLite, retries uploads); **`identify` is eventually consistent** on both platforms — an immediate `identifiedUserId()`/`isAnonymous()` read can return the previous state (verified on-device).
 
@@ -94,7 +94,7 @@ Behavioral notes: all write APIs are fire-and-forget (native core queues + persi
 
 | Bucket | Methods | Notes |
 |---|---|---|
-| **A** — direct | `configure`, `identify`, `logout`, `isAnonymous`, `messages`, `show`, `registerPushToken` | configure forces env default to Production (core's default is Development); `appAccountToken` → `obfuscatedAccountId` (semantics = upstream question); `Message` carries only `id` → `createdAt` stamped at receipt, `rawType`/`workflowType` empty |
+| **A** — direct | `configure`, `identify`, `logout`, `isAnonymous`, `onMessage`, `show`, `registerPushToken` | configure forces env default to Production (core's default is Development); `appAccountToken` → `obfuscatedAccountId` (semantics = upstream question); `Message` carries only `id` → `createdAt` stamped at receipt, `rawType`/`workflowType` empty |
 | **B** — shimmed | `identifiedUserId` (core falls back to anonymousId → bridge returns `null` when anonymous), `unregisterPushToken` (core clears *current* token only), `setEmail`/`setDisplayName`/`setUserProperty`/`setUserProperties` (→ `updateProperties(ProfileProperty…)`; the bulk variant loops per entry; trait-key conventions diverge: Android `"email"` vs iOS `"$gv_email"`), `sdkVersion` (BuildConfig), `isValidEmail` (local regex), `checkForMessages` (no-op — Android IAM is a reactive Flow) |
 | **C** — no backing (log-once gap) | **`track`** (core has NO event API — top ask), `setOptOut`/`isOptedOut`, `setDeviceToken`, `reconcileTransactions`, `registerEmail`/`unregisterEmail`, `setCommunicationPreference` |
 
@@ -106,7 +106,7 @@ Rule: iOS is canonical; Android-missing methods stay in the surface as logged st
 
 The 24 flat functions stay the canonical surface; this is an **additive** layer on top so a React dev wires nothing by hand. Goal: fastest integration, fewest lines, React/RN-idiomatic — mirroring Galva-SwiftUI's view-modifier ergonomics (`.autoDisplayInAppMessages()`, `.inAppMessageSheet($message)`, the `InAppMessages.messages` stream). **Root export** (same barrel — an RN app always has React; components are pure modules so `sideEffects:false` + tree-shaking still hold). It does **not** replace the functions: filtering / manual control drop down to them.
 
-Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `messages` + `show`) → after:
+Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `onMessage` + `show`) → after:
 
 ```tsx
 <Galva apiKey="gv_pub_xxx">
@@ -118,8 +118,8 @@ Before (current `example/`, ~15 lines of `useEffect` wiring `configure` + `messa
 | Member | Maps to (SwiftUI) | Behavior |
 |---|---|---|
 | `<Galva apiKey … environment? logLevel? autoTrackLifecycle?>` | top-level `configure` | calls `configure()` once on mount; **pure side-effect wrapper, no React Context** (the native singleton is the source of truth — re-configure is a native no-op). Renders `children` unchanged. |
-| `<InAppMessageAutoShow filter? />` | `.autoDisplayInAppMessages()` | wires `messages()` → `show(m.id)`, auto-unsubscribes on unmount. Optional `filter: (m) => boolean` covers the "don't show these" advanced case without leaving the component. |
-| `useInAppMessages(handler)` | `.inAppMessageSheet($message)` / `InAppMessages.messages` | hook form of `messages()`; auto-unsub. The controlled path — caller decides when to `show()`. |
+| `<InAppMessageAutoShow filter? />` | `.autoDisplayInAppMessages()` | wires `onMessage()` → `show(m.id)`, auto-unsubscribes on unmount. Optional `filter: (m) => boolean` covers the "don't show these" advanced case without leaving the component. |
+| `useInAppMessages(handler)` | `.inAppMessageSheet($message)` / `InAppMessages.messages` | hook form of `onMessage()`; auto-unsub. The controlled path — caller decides when to `show()`. |
 | `useGalvaUser()` → `{ userId, isAnonymous, loading, refresh() }` | identity reads | `await`s `identifiedUserId()` + `isAnonymous()` **once** on mount into state — **no native event needed**; `refresh()` re-reads after `identify()`/`logout()` (identity is eventually consistent, §4 — refresh on the next tick). |
 
 **Fire-and-forget cleanup (paired with this layer):** `show()` flips `Promise<void>` → **`void`** (native logs `BUNDLE_UNAVAILABLE`/`MESSAGE_NOT_FOUND`/… instead of rejecting) so the write surface is uniformly fire-and-forget per the §4 contract. Audit: **15/16 write functions are already `void`; only `show` changes.** The 5 genuine **queries** (`identifiedUserId`, `isAnonymous`, `isOptedOut`, `isValidEmail`, `sdkVersion`) keep returning Promises — they return data; React consumers reach them through hooks (`useGalvaUser`, …), not raw `await` in effects. `parity-check` is unaffected (JS-only, no new native methods).

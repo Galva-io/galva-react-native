@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react';
-import { messages } from '../api/messages';
+import { onMessage } from '../api/onMessage';
 import type { InAppMessage } from '../types';
 
 /**
  * Subscribe to in-app messages for the component's lifetime — the hook form of
- * {@link messages}, auto-unsubscribing on unmount. The controlled path: you
+ * {@link onMessage}, auto-unsubscribing on unmount. The controlled path: you
  * decide when (and whether) to {@link show} each message.
  *
  * ```tsx
@@ -22,5 +22,5 @@ export function useInAppMessages(
   const handlerRef = useRef(handler);
   handlerRef.current = handler;
 
-  useEffect(() => messages((message) => handlerRef.current(message)), []);
+  useEffect(() => onMessage((message) => handlerRef.current(message)), []);
 }

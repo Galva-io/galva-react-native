@@ -11,7 +11,7 @@ import {
 
 // Phase 1 smoke screen, React-first style (plan §4): <Galva> configures the
 // SDK, <InAppMessageAutoShow> renders any served message, and useGalvaUser
-// reads identity reactively — no useEffect(configure)/messages()/show() wiring.
+// reads identity reactively — no useEffect(configure)/onMessage()/show() wiring.
 // Use a real publishable key to test end-to-end against the dev environment.
 const API_KEY = 'gv_pub_example';
 

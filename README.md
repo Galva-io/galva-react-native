@@ -76,7 +76,7 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 - **Events** — `track`
 - **User** — `identify`, `logout`, `identifiedUserId`, `isAnonymous`, `setEmail`, `setDisplayName`, `setUserProperty`, `setUserProperties` (bulk)
 - **Communication endpoints** — `registerEmail`, `unregisterEmail`, `registerPushToken`, `unregisterPushToken`, `setCommunicationPreference`, `isValidEmail`
-- **In-app messages** — `messages` (emitter; returns an `unsubscribe` function), `show`, `checkForMessages`
+- **In-app messages** — `onMessage` (emitter; returns an `unsubscribe` function), `show`, `checkForMessages`
 
 Plus a React-first layer over the same surface:
 

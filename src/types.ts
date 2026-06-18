@@ -79,7 +79,7 @@ export type WorkflowType =
 
 /**
  * A pending in-app message addressed to the current identity. Receive these
- * through the {@link messages} emitter and pass `id` to {@link show} to render.
+ * through the {@link onMessage} emitter and pass `id` to {@link show} to render.
  */
 export interface InAppMessage {
   /** Server-generated communication id — stable, safe as a dedupe key. */

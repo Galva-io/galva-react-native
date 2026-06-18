@@ -3,21 +3,22 @@ import type { NativeGalvaMessage } from '../NativeBridge';
 import type { InAppMessage, WorkflowType } from '../types';
 
 /**
- * Subscribe to pending in-app messages addressed to the current identity.
- * The SDK publishes the winning message after each foreground poll. Render a
- * message by passing its `id` to {@link show}.
+ * Subscribe to pending in-app messages addressed to the current identity. The
+ * callback fires once per message the SDK publishes after each foreground
+ * poll; render one by passing its `id` to {@link show}.
  *
- * Firebase-style emitter (plan §4): returns a plain `unsubscribe` function.
+ * Firebase-style emitter (plan §4, like `onSnapshot`): returns a plain
+ * `unsubscribe` function — call it to stop listening.
  *
  * ```ts
- * const unsubscribe = messages((message) => {
+ * const unsubscribe = onMessage((message) => {
  *   show(message.id);
  * });
  * // later
  * unsubscribe();
  * ```
  */
-export function messages(
+export function onMessage(
   listener: (message: InAppMessage) => void
 ): () => void {
   const subscription = getGalvaEmitter().addListener(MESSAGE_EVENT, (raw) => {

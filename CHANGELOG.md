@@ -19,7 +19,7 @@ releases and npm publishing — update this file as part of the release PR.
 - Flat, tree-shakeable API surface (24 named exports): configure, track,
   identity (identify/logout/identifiedUserId/isAnonymous), user traits
   (`setUserProperty` + bulk `setUserProperties`), communication endpoints
-  (email + push tokens, preferences) and in-app messages (`messages`
+  (email + push tokens, preferences) and in-app messages (`onMessage`
   emitter + `show`).
 - React-first layer over the same surface: `<Galva>` provider (configures on
   mount), `<InAppMessageAutoShow>` (auto-renders served messages, optional
