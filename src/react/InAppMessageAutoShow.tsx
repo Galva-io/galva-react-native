@@ -5,10 +5,11 @@ import type { InAppMessage } from '../types';
 /** Props for {@link InAppMessageAutoShow}. */
 export interface InAppMessageAutoShowProps {
   /**
-   * Return `false` to suppress a message (e.g. hold surveys until later).
-   * Omit to show everything.
+   * Gate which messages auto-show. Pass a predicate (return `false` to suppress
+   * a message — e.g. hold surveys until later) or a plain boolean to toggle all
+   * messages on/off. Omit to show everything.
    */
-  filter?: (message: InAppMessage) => boolean;
+  shouldShowMessage?: boolean | ((message: InAppMessage) => boolean);
 }
 
 /**
@@ -25,10 +26,14 @@ export interface InAppMessageAutoShowProps {
  * For full control over presentation, drop down to {@link useInAppMessages}.
  */
 export function InAppMessageAutoShow({
-  filter,
+  shouldShowMessage = true,
 }: InAppMessageAutoShowProps = {}): null {
   useInAppMessages((message) => {
-    if (filter && !filter(message)) return;
+    const allowed =
+      typeof shouldShowMessage === 'function'
+        ? shouldShowMessage(message)
+        : shouldShowMessage;
+    if (!allowed) return;
     show(message.id);
   });
 

@@ -23,7 +23,7 @@ releases and npm publishing — update this file as part of the release PR.
   emitter + `show`).
 - React-first layer over the same surface: `<Galva>` provider (configures on
   mount), `<InAppMessageAutoShow>` (auto-renders served messages, optional
-  `filter`), and the `useInAppMessages()` hook.
+  `shouldShowMessage` predicate/boolean), and the `useInAppMessages()` hook.
 - Android module with two source sets: full-surface stub (default, the
   Android core is unreleased) and real core wiring behind the
   `Galva_androidCore=true` Gradle property.

@@ -80,7 +80,7 @@ Flat named exports, one per function (tree-shakeable, lodash-es style):
 
 Plus a React-first layer over the same surface:
 
-- **Components** — `<Galva>` (provider; configures on mount), `<InAppMessageAutoShow>` (auto-renders served messages; optional `filter` prop)
+- **Components** — `<Galva>` (provider; configures on mount), `<InAppMessageAutoShow>` (auto-renders served messages; optional `shouldShowMessage` prop — predicate or boolean)
 - **Hooks** — `useInAppMessages(handler)` (subscribe to in-app messages for a component's lifetime; auto-unsubscribes on unmount)
 
 Each export carries full TSDoc; types (`GalvaConfig`, `InAppMessage`, …) are exported from the package root.
