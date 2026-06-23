@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   js:
-    name: JS (typecheck · lint · bridge · build)
+    name: JS (typecheck · lint · bridge · build · plugin)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,11 +29,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci --ignore-scripts
+      # No --ignore-scripts: bun (devDependency) sets up its binary on install,
+      # and `prepare` builds lib + plugin. check:bridge and test:plugin run on bun.
+      - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run check:bridge
       - run: npm run build
+      # Expo config-plugin transforms (deep-link scheme registration, etc.)
+      - run: npm run test:plugin
 
   ios:
     name: iOS (example pod install + build)

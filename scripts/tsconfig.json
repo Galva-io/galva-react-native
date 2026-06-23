@@ -1,0 +1,27 @@
+{
+  // Static safety net for the bun-run TypeScript scripts (gen-bridge,
+  // test-plugin). Bun executes them by stripping types; this config is what
+  // actually type-checks them — run by `npm run typecheck`. test-plugin imports
+  // the plugin source, so its exports are checked here too (the whole point:
+  // the test stops compiling if the plugin's API drifts).
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false
+  },
+  "include": ["./**/*.ts"]
+}

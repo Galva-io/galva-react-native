@@ -1,6 +1,6 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 //
-// gen-bridge.mjs
+// gen-bridge.ts  (run with bun)
 //
 // Generates ios/bridge/GalvaModule.m from the `GalvaNativeModule` interface in
 // src/native/GalvaNative.ts (parsed with the TypeScript compiler API). The TS
@@ -30,6 +30,16 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
+interface Param {
+  name: string;
+  type: string;
+}
+interface Method {
+  name: string;
+  params: Param[];
+  isPromise: boolean;
+}
+
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TS_PATH = join(root, 'src/native/GalvaNative.ts');
 const M_PATH = join(root, 'ios/bridge/GalvaModule.m');
@@ -38,13 +48,13 @@ const INTERFACE = 'GalvaNativeModule';
 // Provided natively by RCTEventEmitter — not externed, not in the Swift impl.
 const EMITTER_BUILTINS = new Set(['addListener', 'removeListeners']);
 
-const pascal = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const pascal = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
 /** Map a TS parameter type to an Obj-C bridge type. */
-function objcType(typeText) {
+function objcType(typeText: string): string {
   const nullable = /\b(null|undefined)\b/.test(typeText);
   const base = typeText.replace(/\s*\|\s*(null|undefined)\s*/g, '').trim();
-  let t;
+  let t: string;
   if (base === 'string') t = 'NSString *';
   else if (base === 'boolean') t = 'BOOL';
   else if (base === 'number') t = 'NSNumber *';
@@ -53,17 +63,17 @@ function objcType(typeText) {
   return t;
 }
 
-function parseMethods() {
+function parseMethods(): Method[] {
   const src = readFileSync(TS_PATH, 'utf8');
   const sf = ts.createSourceFile(TS_PATH, src, ts.ScriptTarget.Latest, true);
-  const methods = [];
-  const visit = (node) => {
+  const methods: Method[] = [];
+  const visit = (node: ts.Node): void => {
     if (ts.isInterfaceDeclaration(node) && node.name.text === INTERFACE) {
       for (const m of node.members) {
         if (!ts.isMethodSignature(m) || !m.name) continue;
         const name = m.name.getText(sf);
         if (EMITTER_BUILTINS.has(name)) continue;
-        const params = m.parameters.map((p) => ({
+        const params: Param[] = m.parameters.map((p) => ({
           name: p.name.getText(sf),
           type: p.type ? p.type.getText(sf) : 'unknown',
         }));
@@ -74,26 +84,32 @@ function parseMethods() {
     ts.forEachChild(node, visit);
   };
   visit(sf);
-  if (methods.length === 0) throw new Error(`No methods found in interface ${INTERFACE}`);
+  if (methods.length === 0) {
+    throw new Error(`No methods found in interface ${INTERFACE}`);
+  }
   return methods;
 }
 
 /** Build the RCT_EXTERN_METHOD body + the bare selector for one method. */
-function buildExtern({ name, params, isPromise }) {
+function buildExtern({ name, params, isPromise }: Method): {
+  extern: string;
+  selector: string;
+} {
   if (params.length === 0 && !isPromise) {
     return { extern: name, selector: name };
   }
-  const segs = [];
-  const selector = [];
-  if (params.length >= 1) {
-    segs.push(`${name}:(${objcType(params[0].type)})${params[0].name}`);
+  const segs: string[] = [];
+  const selector: string[] = [];
+  const [first, ...rest] = params;
+  if (first) {
+    segs.push(`${name}:(${objcType(first.type)})${first.name}`);
   } else {
     segs.push(`${name}:(RCTPromiseResolveBlock)resolve`);
   }
   selector.push(`${name}:`);
-  for (let i = 1; i < params.length; i++) {
-    const label = `with${pascal(params[i].name)}`;
-    segs.push(`${label}:(${objcType(params[i].type)})${params[i].name}`);
+  for (const p of rest) {
+    const label = `with${pascal(p.name)}`;
+    segs.push(`${label}:(${objcType(p.type)})${p.name}`);
     selector.push(`${label}:`);
   }
   if (isPromise) {
@@ -107,7 +123,7 @@ function buildExtern({ name, params, isPromise }) {
   return { extern: segs.join(' '), selector: selector.join('') };
 }
 
-function render(methods) {
+function render(methods: Method[]): string {
   const externs = methods
     .map((m) => `RCT_EXTERN_METHOD(${buildExtern(m).extern})`)
     .join('\n\n');
@@ -115,7 +131,7 @@ function render(methods) {
 //  GalvaModule.m
 //  @galva/react-native
 //
-//  AUTO-GENERATED from src/native/GalvaNative.ts by scripts/gen-bridge.mjs.
+//  AUTO-GENERATED from src/native/GalvaNative.ts by scripts/gen-bridge.ts.
 //  Do NOT edit by hand — run "npm run gen:bridge". "npm run check:bridge" fails
 //  if this file is stale and verifies GalvaModule.swift exposes a matching
 //  @objc(...) selector for every method. The example app's E2E smoke exercises
@@ -146,8 +162,10 @@ if (process.argv.includes('--check')) {
   }
 
   const swift = readFileSync(SWIFT_PATH, 'utf8');
-  const swiftSelectors = new Set(
-    [...swift.matchAll(/@objc\(([^)]+)\)\s*func\b/g)].map((m) => m[1])
+  const swiftSelectors = new Set<string>(
+    [...swift.matchAll(/@objc\(([^)]+)\)\s*func\b/g)].flatMap((m) =>
+      m[1] ? [m[1]] : []
+    )
   );
   for (const m of methods) {
     const { selector } = buildExtern(m);

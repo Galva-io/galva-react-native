@@ -16,7 +16,7 @@ first-party Swift core (vendored into the pod); Android integration is coming.
   blocks the JS thread.
 - **Zero-setup linking & push** — deep links are observed through React
   Native's `Linking` API; APNs token + notification taps are captured
-  automatically on iOS.
+  automatically on iOS. The Expo plugin even registers your Galva URL scheme.
 - **Bare and Expo** — ships an Expo config plugin so managed apps need no
   native edits.
 
@@ -47,6 +47,57 @@ export default function App() {
 ```
 
 See [`docs/`](./docs) for the full API, Expo setup, and push notifications.
+
+## Deep links
+
+Galva assigns your app a **deep-link URL scheme** (it begins with `gv`, e.g.
+`gvabc123` — copy it from your Galva dashboard). Once the scheme is registered
+with the OS, the SDK claims matching links automatically — `configureSDK`
+forwards them through React Native's `Linking` API, so there are no AppDelegate
+or scene edits.
+
+**Expo** — pass the scheme to the config plugin in `app.json`; it wires up iOS
+`CFBundleURLTypes` and the Android launcher `intent-filter` for you:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      ["@galva/react-native", { "deepLinkScheme": "gvabc123" }]
+    ]
+  }
+}
+```
+
+`deepLinkScheme` also accepts an array (`["gvabc123", "gvdef456"]`). Other plugin
+props: `push` (default `true`), `swizzle` (default `true`).
+
+**Bare React Native** — the plugin isn't read, so register the scheme yourself
+(this is the standard iOS/Android URL-scheme setup):
+
+- iOS — add to `ios/<App>/Info.plist`:
+
+  ```xml
+  <key>CFBundleURLTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleURLSchemes</key>
+      <array><string>gvabc123</string></array>
+    </dict>
+  </array>
+  ```
+
+- Android — add an intent-filter to your launcher `<activity>` in
+  `AndroidManifest.xml`:
+
+  ```xml
+  <intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="gvabc123" />
+  </intent-filter>
+  ```
 
 ## License
 

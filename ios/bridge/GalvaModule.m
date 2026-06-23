@@ -2,7 +2,7 @@
 //  GalvaModule.m
 //  @galva/react-native
 //
-//  AUTO-GENERATED from src/native/GalvaNative.ts by scripts/gen-bridge.mjs.
+//  AUTO-GENERATED from src/native/GalvaNative.ts by scripts/gen-bridge.ts.
 //  Do NOT edit by hand — run "npm run gen:bridge". "npm run check:bridge" fails
 //  if this file is stale and verifies GalvaModule.swift exposes a matching
 //  @objc(...) selector for every method. The example app's E2E smoke exercises
