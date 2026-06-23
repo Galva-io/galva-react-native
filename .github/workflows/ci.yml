@@ -1,0 +1,73 @@
+# CI for @galva/react-native.
+#
+#   • js  — the always-on gates: strict typecheck, lint, bridge-contract guard,
+#           and the bob/plugin build. No native toolchain needed.
+#   • ios — the native gate: pod install + build the example app, which compiles
+#           the vendored Swift core + bridge + auto-wire against React Native.
+#
+# The iOS core compiles against the iOS 26 SDK (Xcode 26), so the example's
+# React Native must be a version that also supports that toolchain (clang 21).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  js:
+    name: JS (typecheck · lint · bridge · build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run check:bridge
+      - run: npm run build
+
+  ios:
+    name: iOS (example pod install + build)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26 (required by the Galva iOS core)
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)"
+          [ -z "$XCODE" ] && XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          echo "Selecting $XCODE"
+          sudo xcode-select -switch "$XCODE"
+          xcodebuild -version
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Installs the workspace (example deps + links the local package) and runs
+      # prepare (bob build + tsc -p plugin).
+      - name: Install
+        run: npm ci
+
+      - name: Pod install
+        run: cd example/ios && pod install
+
+      - name: Build example (simulator)
+        run: |
+          cd example/ios
+          xcodebuild build \
+            -workspace GalvaExample.xcworkspace \
+            -scheme GalvaExample \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO
