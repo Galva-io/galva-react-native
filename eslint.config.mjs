@@ -17,6 +17,8 @@ export default tseslint.config(
       'android/',
       'coverage/',
       'scripts/', // Node build tooling — verified by running, not linting.
+      'in-app-message.js', // generated subpath shims (re-export from lib/)
+      'react.js',
     ],
   },
   js.configs.recommended,

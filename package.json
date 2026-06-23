@@ -11,8 +11,24 @@
       "types": "./lib/typescript/index.d.ts",
       "default": "./lib/module/index.js"
     },
+    "./in-app-message": {
+      "source": "./src/in-app-message/index.ts",
+      "types": "./lib/typescript/in-app-message/index.d.ts",
+      "default": "./lib/module/in-app-message/index.js"
+    },
+    "./react": {
+      "source": "./src/react/index.ts",
+      "types": "./lib/typescript/react/index.d.ts",
+      "default": "./lib/module/react/index.js"
+    },
     "./package.json": "./package.json",
     "./app.plugin.js": "./app.plugin.js"
+  },
+  "typesVersions": {
+    "*": {
+      "in-app-message": ["./lib/typescript/in-app-message/index.d.ts"],
+      "react": ["./lib/typescript/react/index.d.ts"]
+    }
   },
   "sideEffects": false,
   "files": [
@@ -23,6 +39,8 @@
     "*.podspec",
     "galva.lock.json",
     "app.plugin.js",
+    "in-app-message.js",
+    "react.js",
     "plugin/build",
     "scripts",
     "react-native.config.js",
