@@ -34,6 +34,7 @@ final class GalvaAutoWire: NSObject {
   /// Forward the raw APNs device token captured from the app delegate.
   @objc static func forwardDeviceToken(_ tokenData: Data) {
     Galva.applicationDidRegisterForRemoteNotificationsWithDeviceToken(tokenData)
+    Self.didForward(Self.didForwardDeviceTokenNotification)
   }
 
   #if canImport(UserNotifications)
@@ -44,6 +45,27 @@ final class GalvaAutoWire: NSObject {
     response: UNNotificationResponse
   ) {
     Galva.userNotificationCenter(center, didReceive: response)
+    Self.didForward(Self.didForwardNotificationResponseNotification)
   }
   #endif
+
+  // MARK: - Test observation seam (DEBUG only — zero footprint in release)
+  //
+  // The app-hosted swizzler E2E (example/ios/GalvaExampleTests) drives the real
+  // swizzled delegate methods on the real app/UN delegates and needs to confirm
+  // that *this* shim actually ran the forward — not just that nothing crashed.
+  // In DEBUG we post a notification after each forward; the test counts them.
+  // Compiled out entirely in release, so production carries no observer, no
+  // post, no branch. The names are matched verbatim by the E2E.
+
+  /// Posted (DEBUG only) after a device token is forwarded to the core.
+  static let didForwardDeviceTokenNotification = "GalvaAutoWireDidForwardDeviceToken"
+  /// Posted (DEBUG only) after a notification response is forwarded to the core.
+  static let didForwardNotificationResponseNotification = "GalvaAutoWireDidForwardNotificationResponse"
+
+  private static func didForward(_ name: String) {
+    #if DEBUG
+    NotificationCenter.default.post(name: Notification.Name(name), object: nil)
+    #endif
+  }
 }

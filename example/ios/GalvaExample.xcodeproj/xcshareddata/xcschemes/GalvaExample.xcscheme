@@ -32,7 +32,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
+               BlueprintIdentifier = "772A39A7DA6A516F03F18C5C"
                BuildableName = "GalvaExampleTests.xctest"
                BlueprintName = "GalvaExampleTests"
                ReferencedContainer = "container:GalvaExample.xcodeproj">

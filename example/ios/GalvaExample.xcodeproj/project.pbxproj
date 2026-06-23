@@ -9,22 +9,44 @@
 /* Begin PBXBuildFile section */
 		0C80B921A6F3F58F76C31292 /* libPods-GalvaExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-GalvaExample.a */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		74AE4BE9F9049B12F72A6BDA /* libPods-GalvaExampleTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD9534B4A199CBD4160A865C /* libPods-GalvaExampleTests.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		8E1116F9C19A3F668CB7BAF4 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		9E8DCC6308509356783EFAD5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D045EF7D63B028F5F2E524A /* Foundation.framework */; };
+		E505BF3DF7C5053363DE8B8C /* GalvaSwizzleE2ETests.m in Sources */ = {isa = PBXBuildFile; fileRef = 24E2245C18A8AF2EC18448E8 /* GalvaSwizzleE2ETests.m */; };
+		F321AAC8D6879808CA9A7932 /* GalvaE2ECompetitorSwizzler.m in Sources */ = {isa = PBXBuildFile; fileRef = 430ADCC5BD08DE6AE133276E /* GalvaE2ECompetitorSwizzler.m */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D7C9AE05E137CDBF39A64CEE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
+			remoteInfo = GalvaExample;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		05D25788BB84EEF47A21BB30 /* Pods-GalvaExampleTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GalvaExampleTests.debug.xcconfig"; path = "Target Support Files/Pods-GalvaExampleTests/Pods-GalvaExampleTests.debug.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* GalvaExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GalvaExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = GalvaExample/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = GalvaExample/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = GalvaExample/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		24E2245C18A8AF2EC18448E8 /* GalvaSwizzleE2ETests.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = GalvaSwizzleE2ETests.m; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-GalvaExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GalvaExample.debug.xcconfig"; path = "Target Support Files/Pods-GalvaExample/Pods-GalvaExample.debug.xcconfig"; sourceTree = "<group>"; };
+		430ADCC5BD08DE6AE133276E /* GalvaE2ECompetitorSwizzler.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = GalvaE2ECompetitorSwizzler.m; sourceTree = "<group>"; };
+		45E778B8209FB78DCA7B1DCE /* Pods-GalvaExampleTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GalvaExampleTests.release.xcconfig"; path = "Target Support Files/Pods-GalvaExampleTests/Pods-GalvaExampleTests.release.xcconfig"; sourceTree = "<group>"; };
+		4D045EF7D63B028F5F2E524A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		5709B34CF0A7D63546082F79 /* Pods-GalvaExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GalvaExample.release.xcconfig"; path = "Target Support Files/Pods-GalvaExample/Pods-GalvaExample.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-GalvaExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GalvaExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = GalvaExample/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = GalvaExample/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		C804CF9C7A9A64B7E8746D5E /* GalvaExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GalvaExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E0B1845CC07D7EC0AF87AD4C /* GalvaE2ECompetitorSwizzler.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = GalvaE2ECompetitorSwizzler.h; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		FD9534B4A199CBD4160A865C /* libPods-GalvaExampleTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GalvaExampleTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +55,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-GalvaExample.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		979FF903CBA69DD4413D7EE4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9E8DCC6308509356783EFAD5 /* Foundation.framework in Frameworks */,
+				74AE4BE9F9049B12F72A6BDA /* libPods-GalvaExampleTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -56,8 +87,29 @@
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-GalvaExample.a */,
+				57E3D14589827C06F6260F5C /* iOS */,
+				FD9534B4A199CBD4160A865C /* libPods-GalvaExampleTests.a */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		57E3D14589827C06F6260F5C /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				4D045EF7D63B028F5F2E524A /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		685AD566C0AB0DABC157AF5F /* GalvaExampleTests */ = {
+			isa = PBXGroup;
+			children = (
+				430ADCC5BD08DE6AE133276E /* GalvaE2ECompetitorSwizzler.m */,
+				24E2245C18A8AF2EC18448E8 /* GalvaSwizzleE2ETests.m */,
+				E0B1845CC07D7EC0AF87AD4C /* GalvaE2ECompetitorSwizzler.h */,
+			);
+			name = GalvaExampleTests;
+			path = GalvaExampleTests;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -75,6 +127,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				685AD566C0AB0DABC157AF5F /* GalvaExampleTests */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -85,6 +138,7 @@
 			isa = PBXGroup;
 			children = (
 				13B07F961A680F5B00A75B9A /* GalvaExample.app */,
+				C804CF9C7A9A64B7E8746D5E /* GalvaExampleTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -94,6 +148,8 @@
 			children = (
 				3B4392A12AC88292D35C810B /* Pods-GalvaExample.debug.xcconfig */,
 				5709B34CF0A7D63546082F79 /* Pods-GalvaExample.release.xcconfig */,
+				45E778B8209FB78DCA7B1DCE /* Pods-GalvaExampleTests.release.xcconfig */,
+				05D25788BB84EEF47A21BB30 /* Pods-GalvaExampleTests.debug.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -122,6 +178,25 @@
 			productReference = 13B07F961A680F5B00A75B9A /* GalvaExample.app */;
 			productType = "com.apple.product-type.application";
 		};
+		772A39A7DA6A516F03F18C5C /* GalvaExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7573A23AF3B9F1FB0037D5F2 /* Build configuration list for PBXNativeTarget "GalvaExampleTests" */;
+			buildPhases = (
+				1A9AB1C3A464EBC0730892CB /* [CP] Check Pods Manifest.lock */,
+				22D8078C2D5BAA54BCCE0817 /* Sources */,
+				979FF903CBA69DD4413D7EE4 /* Frameworks */,
+				CEAF9C43182122A660F56EE3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9CE959DBCE643442F4B5DA50 /* PBXTargetDependency */,
+			);
+			name = GalvaExampleTests;
+			productName = GalvaExampleTests;
+			productReference = C804CF9C7A9A64B7E8746D5E /* GalvaExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -149,6 +224,7 @@
 			projectRoot = "";
 			targets = (
 				13B07F861A680F5B00A75B9A /* GalvaExample */,
+				772A39A7DA6A516F03F18C5C /* GalvaExampleTests */,
 			);
 		};
 /* End PBXProject section */
@@ -161,6 +237,13 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				8E1116F9C19A3F668CB7BAF4 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CEAF9C43182122A660F56EE3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,6 +281,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GalvaExample/Pods-GalvaExample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1A9AB1C3A464EBC0730892CB /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GalvaExampleTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
@@ -250,9 +355,56 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		22D8078C2D5BAA54BCCE0817 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F321AAC8D6879808CA9A7932 /* GalvaE2ECompetitorSwizzler.m in Sources */,
+				E505BF3DF7C5053363DE8B8C /* GalvaSwizzleE2ETests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		9CE959DBCE643442F4B5DA50 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = GalvaExample;
+			target = 13B07F861A680F5B00A75B9A /* GalvaExample */;
+			targetProxy = D7C9AE05E137CDBF39A64CEE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		0D09944538B01B94DB7A061A /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 45E778B8209FB78DCA7B1DCE /* Pods-GalvaExampleTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				ENABLE_TESTING_SEARCH_PATHS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/GalvaExampleTests\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.GalvaExample.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GalvaExample.app/GalvaExample";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-GalvaExample.debug.xcconfig */;
@@ -310,6 +462,34 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		1D28B73526EE2B8E5B22CFCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05D25788BB84EEF47A21BB30 /* Pods-GalvaExampleTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGNING_ALLOWED = NO;
+				ENABLE_TESTING_SEARCH_PATHS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/GalvaExampleTests\"",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.GalvaExample.Tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GalvaExample.app/GalvaExample";
+			};
+			name = Debug;
 		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -477,6 +657,15 @@
 			buildConfigurations = (
 				13B07F941A680F5B00A75B9A /* Debug */,
 				13B07F951A680F5B00A75B9A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7573A23AF3B9F1FB0037D5F2 /* Build configuration list for PBXNativeTarget "GalvaExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0D09944538B01B94DB7A061A /* Release */,
+				1D28B73526EE2B8E5B22CFCA /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

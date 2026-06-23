@@ -64,6 +64,7 @@
     "gen:bridge": "node scripts/gen-bridge.mjs",
     "check:bridge": "node scripts/gen-bridge.mjs --check",
     "test:ios": "bash scripts/test-autowire.sh",
+    "test:ios:e2e": "bash scripts/test-autowire-e2e.sh",
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,md,json}\"",
     "build": "bob build && tsc -p plugin",
     "clean": "del-cli lib plugin/build",

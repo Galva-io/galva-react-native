@@ -23,6 +23,14 @@ target 'GalvaExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # App-hosted swizzler E2E (GalvaExampleTests). Inherits search paths only —
+  # it runs inside the host app, so Galva's symbols resolve from the app at
+  # runtime; the test target itself links nothing extra. See
+  # scripts/gen-e2e-target.rb (adds the target) and scripts/test-autowire-e2e.sh.
+  target 'GalvaExampleTests' do
+    inherit! :search_paths
+  end
+
   post_install do |installer|
     react_native_post_install(
       installer,

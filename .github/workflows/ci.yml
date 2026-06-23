@@ -76,3 +76,11 @@ jobs:
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
+
+      # Real-world proof: run the swizzler INSIDE the example app, through the
+      # real application lifecycle, against the real Galva pod, alongside a live
+      # OneSignal-style competitor swizzler — both load orders, completion-once.
+      # (The unit tests above prove the logic deterministically; this proves the
+      # real-launch install + framework coexistence.)
+      - name: Swizzler E2E (real app lifecycle + competitor coexistence)
+        run: npm run test:ios:e2e
