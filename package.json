@@ -26,8 +26,12 @@
   },
   "typesVersions": {
     "*": {
-      "in-app-message": ["./lib/typescript/in-app-message/index.d.ts"],
-      "react": ["./lib/typescript/react/index.d.ts"]
+      "in-app-message": [
+        "./lib/typescript/in-app-message/index.d.ts"
+      ],
+      "react": [
+        "./lib/typescript/react/index.d.ts"
+      ]
     }
   },
   "sideEffects": false,
@@ -103,6 +107,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
+    "@expo/config-plugins": "^56.0.9",
+    "@types/node": "^26.0.0",
     "@types/react": "^19.0.0",
     "del-cli": "^7.0.0",
     "eslint": "^9.0.0",

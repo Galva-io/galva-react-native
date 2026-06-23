@@ -1,0 +1,31 @@
+// Android placeholder for @galva/react-native.
+//
+// The native Android integration is not implemented yet — GalvaModule is a stub
+// so the package resolves and links in an RN app (calls are inert on Android).
+// This will be fleshed out when Android support lands. Targets RN 0.71+ (the
+// `react-android` artifact); revisit when wiring real Android support.
+
+apply plugin: "com.android.library"
+apply plugin: "org.jetbrains.kotlin.android"
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+android {
+    namespace "com.galva.reactnative"
+    compileSdkVersion safeExtGet("compileSdkVersion", 34)
+
+    defaultConfig {
+        minSdkVersion safeExtGet("minSdkVersion", 24)
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+}
+
+dependencies {
+    implementation "com.facebook.react:react-android"
+}

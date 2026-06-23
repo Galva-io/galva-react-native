@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Namespace is declared in build.gradle (AGP 7+). Intentionally empty;
+         the Galva AAR's own permissions will be merged when Android lands. -->
+</manifest>
