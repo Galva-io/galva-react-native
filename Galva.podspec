@@ -26,6 +26,9 @@ Pod::Spec.new do |s|
     "ios/autowire/**/*.{h,m,swift}",
     "ios/galva-src/Sources/**/*.swift"
 
+  # Swizzler unit tests live next to the swizzler but must never ship in the pod.
+  s.exclude_files = "ios/**/__tests__/**/*"
+
   # platform (iOS 15) / swift_versions (6.0) / library (sqlite3) — single source
   # of truth lives in galva-ios's cocoapods/galva-build.rb, vendored above.
   galva_apply_build_settings(s)

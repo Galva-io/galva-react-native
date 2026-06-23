@@ -21,3 +21,4 @@ android/local.properties
 coverage/
 *.tgz
 .expo/
+.autowire-test/

@@ -35,6 +35,8 @@
 #import <UIKit/UIKit.h>
 #import <UserNotifications/UserNotifications.h>
 
+#import "GalvaAutoWireInstaller.h"
+
 #pragma mark - Swift shim (forward declaration)
 
 // Declared here rather than via the generated "-Swift.h" (awkward to import
@@ -44,12 +46,6 @@
 + (void)forwardDeviceToken:(NSData *)tokenData;
 + (void)forwardNotificationResponse:(UNUserNotificationCenter *)center
                            response:(UNNotificationResponse *)response;
-@end
-
-#pragma mark - Installer interface
-
-@interface GalvaAutoWireInstaller : NSObject
-+ (void)instrumentNotificationDelegate:(id)delegate;
 @end
 
 #pragma mark - Replacement implementations
@@ -155,12 +151,27 @@ static void galva_install(Class cls, SEL sel, SEL chainSel, IMP newIMP, const ch
   [[NSNotificationCenter defaultCenter] removeObserver:self
                                                   name:UIApplicationDidFinishLaunchingNotification
                                                 object:nil];
+  [self installForApplicationDelegate:[UIApplication sharedApplication].delegate
+                 notificationDelegate:[UNUserNotificationCenter currentNotificationCenter].delegate];
+}
+
+// Gate + instrument. Extracted so tests can drive it with explicit fake
+// delegates and toggle `GalvaAutoWire.isEnabled`. Production behavior is
+// identical to the previous inline version.
++ (void)installForApplicationDelegate:(id)appDelegate
+                 notificationDelegate:(id)notificationDelegate {
   if (![GalvaAutoWire isEnabled]) {
     return;
   }
-  [self instrumentApplicationDelegate:[UIApplication sharedApplication].delegate];
+  [self instrumentApplicationDelegate:appDelegate];
   [self swizzleNotificationCenterSetDelegate];
-  [self instrumentNotificationDelegate:[UNUserNotificationCenter currentNotificationCenter].delegate];
+  [self instrumentNotificationDelegate:notificationDelegate];
+}
+
+// Clear the per-class de-dupe registry (test isolation). Does not un-swizzle.
++ (void)reset {
+  [[self swizzledClassNamesForKey:@"appDelegate"] removeAllObjects];
+  [[self swizzledClassNamesForKey:@"unDelegate"] removeAllObjects];
 }
 
 + (void)instrumentApplicationDelegate:(id<UIApplicationDelegate>)delegate {
@@ -199,16 +210,26 @@ static void galva_install(Class cls, SEL sel, SEL chainSel, IMP newIMP, const ch
                 "v@:@@@?");
 }
 
++ (void)swizzleSetDelegateOnClass:(Class)cls {
+  // Idempotent per class. (Only one class — UNUserNotificationCenter — is
+  // swizzled in production; the generic form exists so tests can exercise the
+  // setter-swizzle against a stand-in class without an app bundle.)
+  NSMutableSet *done = [self swizzledClassNamesForKey:@"setDelegate"];
+  NSString *name = NSStringFromClass(cls);
+  if ([done containsObject:name]) {
+    return;
+  }
+  [done addObject:name];
+  Method m = class_getInstanceMethod(cls, @selector(setDelegate:));
+  if (!m) {
+    return;
+  }
+  galva_originalSetUNDelegate = (void (*)(id, SEL, id))method_getImplementation(m);
+  method_setImplementation(m, (IMP)galva_setUNDelegate);
+}
+
 + (void)swizzleNotificationCenterSetDelegate {
-  static dispatch_once_t once;
-  dispatch_once(&once, ^{
-    Method m = class_getInstanceMethod([UNUserNotificationCenter class], @selector(setDelegate:));
-    if (!m) {
-      return;
-    }
-    galva_originalSetUNDelegate = (void (*)(id, SEL, id))method_getImplementation(m);
-    method_setImplementation(m, (IMP)galva_setUNDelegate);
-  });
+  [self swizzleSetDelegateOnClass:[UNUserNotificationCenter class]];
 }
 
 @end

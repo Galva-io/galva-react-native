@@ -58,6 +58,11 @@ jobs:
       - name: Install
         run: npm ci
 
+      # Deterministic proof the push auto-wiring swizzler is safe (opt-out,
+      # chaining, completion-handler-once, idempotency, coexistence).
+      - name: Swizzler unit tests (auto-wiring)
+        run: npm run test:ios
+
       - name: Pod install
         run: cd example/ios && pod install
 

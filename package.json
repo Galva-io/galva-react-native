@@ -63,6 +63,7 @@
     "lint": "eslint .",
     "gen:bridge": "node scripts/gen-bridge.mjs",
     "check:bridge": "node scripts/gen-bridge.mjs --check",
+    "test:ios": "bash scripts/test-autowire.sh",
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,md,json}\"",
     "build": "bob build && tsc -p plugin",
     "clean": "del-cli lib plugin/build",
