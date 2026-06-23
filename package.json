@@ -39,7 +39,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "check:bridge": "node scripts/check-bridge-parity.mjs",
+    "gen:bridge": "node scripts/gen-bridge.mjs",
+    "check:bridge": "node scripts/gen-bridge.mjs --check",
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,md,json}\"",
     "build": "bob build && tsc -p plugin",
     "clean": "del-cli lib plugin/build",

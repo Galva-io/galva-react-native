@@ -1,23 +1,22 @@
 //
 // Public type surface for @galva/react-native.
 //
-// These mirror the Galva iOS core's facade (Galva / AppEvents / AppUser /
-// Communication / InAppMessages). Kept deliberately strict and JSON-clean:
-// values that cross the bridge are limited to string | number | boolean.
+// Mirrors the Galva iOS core facade (Galva / AppEvents / AppUser /
+// InAppMessages). Values that cross the bridge are JSON-clean by construction.
 //
 
 /**
  * Galva runtime environment.
  *
  * - `'production'` (default) / `'development'` — Galva-hosted backends.
- * - A custom object — point the SDK at your own API + WebView bundle CDN.
+ * - a custom object — point the SDK at your own API + WebView bundle CDN.
  */
 export type GalvaEnvironment =
   | 'production'
   | 'development'
   | {
-      readonly apiBaseURL: string;
-      readonly webviewBundleCDN: string;
+      apiBaseURL: string;
+      webviewBundleCDN: string;
     };
 
 /** SDK log verbosity. Maps 1:1 to the iOS core's `LogLevel`. */
@@ -30,7 +29,7 @@ export type GalvaLogLevel =
   | 'fault'
   | 'off';
 
-/** Options accepted by `configure`. */
+/** Options accepted by `configureSDK`. */
 export interface GalvaConfig {
   /** Publishable API key (`gv_pub_…`). */
   readonly apiKey: string;
@@ -38,40 +37,73 @@ export interface GalvaConfig {
   readonly environment?: GalvaEnvironment;
   /** Log verbosity. Defaults to `'warning'`. */
   readonly logLevel?: GalvaLogLevel;
-  /** Auto-track app lifecycle (session_start). Defaults to `true`. */
-  readonly autoTrackLifecycle?: boolean;
+  /** Automatic event collection. Both categories default to `true`. */
+  readonly autoTrack?: {
+    /** Auto-track app lifecycle (`session_start`). */
+    readonly lifecycle?: boolean;
+    /** Resolve Apple Search Ads attribution once per install. */
+    readonly appleSearchAds?: boolean;
+  };
 }
 
-/** A value accepted as an event attribute or user property. */
-export type GalvaValue = string | number | boolean;
+/** A scalar value accepted as a user attribute. */
+export type GalvaValue = string | number | boolean | null;
 
-/** Bag of event attributes / user properties. */
-export type GalvaAttributes = Readonly<Record<string, GalvaValue>>;
+/** A JSON value accepted as an event attribute (scalars may nest). */
+export type GalvaJSONValue =
+  | GalvaValue
+  | GalvaJSONValue[]
+  | { [key: string]: GalvaJSONValue };
 
-/** Push token transport. */
-export type GalvaPushPlatform = 'apns' | 'fcm';
+/** Bag of event attributes passed to `trackEvent`. */
+export type GalvaAttributes = Record<string, GalvaJSONValue>;
 
-/** Communication channel for preference control. */
-export type GalvaCommunicationChannel = 'email' | 'push';
+/**
+ * User attributes passed to `setUserAttributes`. Known traits are typed and
+ * mapped to Galva's canonical wire keys; any additional key is sent as a
+ * custom trait.
+ */
+export interface GalvaUserAttributes {
+  email?: string;
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  country?: string;
+  timezone?: string;
+  languageCode?: string;
+  totalLifetimeValue?: number;
+  [key: string]: GalvaValue | undefined;
+}
+
+/** A forwarded notification interaction (manual / opt-out path). */
+export interface GalvaNotificationResponse {
+  /** The notification's identifier (from your push library). */
+  id: string;
+  /** The APNs payload `userInfo`. */
+  userInfo: Record<string, unknown>;
+  /** `'default'` (a tap, the default) or `'dismiss'`. */
+  action?: 'default' | 'dismiss';
+}
 
 /** A known Galva workflow; forward-compatible with future server values. */
 export type GalvaWorkflowType =
-  | 'trialRescue'
-  | 'paymentRecovery'
-  | 'subscriberRescue'
-  | 'winback'
+  | 'prechurn-save'
+  | 'payment-recovery'
+  | 'trial-rescue'
   | (string & {});
 
-/**
- * An in-app message surfaced by the SDK. Ids come from the message emitter and
- * are passed back to `show` to present the message.
- */
+/** An in-app message surfaced by the SDK. Pass `id` to `showMessage`. */
 export interface GalvaInAppMessage {
   readonly id: string;
   /** Creation time, epoch milliseconds. */
   readonly createdAt: number;
-  /** Raw server message type. */
+  /** Raw server message type (e.g. `"trial-rescue-in-app"`). */
   readonly rawType: string;
   /** Parsed workflow type, when the server provides one. */
   readonly workflowType?: GalvaWorkflowType;
+}
+
+/** A removable event subscription (returned by `addMessageObserver`). */
+export interface GalvaSubscription {
+  remove(): void;
 }

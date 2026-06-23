@@ -16,6 +16,7 @@ export default tseslint.config(
       'ios/',
       'android/',
       'coverage/',
+      'scripts/', // Node build tooling — verified by running, not linting.
     ],
   },
   js.configs.recommended,
