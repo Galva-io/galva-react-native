@@ -1,8 +1,0 @@
-// npm workspaces hoist @react-native/gradle-plugin to the REPO-ROOT
-// node_modules (example/node_modules has no copy) — hence ../../ paths.
-pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
-plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
-rootProject.name = 'galva.reactnative.example'
-include ':app'
-includeBuild('../../node_modules/@react-native/gradle-plugin')
