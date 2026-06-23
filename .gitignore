@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+lib/
+plugin/build/
+*.tsbuildinfo
+
+# native build artifacts
+ios/build/
+ios/Pods/
+android/build/
+android/.gradle/
+android/local.properties
+
+# the vendored iOS core (ios/galva-src) is COMMITTED on purpose — do not ignore it.
+
+# misc
+.DS_Store
+*.log
+coverage/
+*.tgz
+.expo/
