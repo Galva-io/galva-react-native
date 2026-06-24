@@ -55,7 +55,9 @@ rmSync(join(ROOT, tarball));
 
 // 2. Install the fixture (expo + RN + the packed SDK) and prebuild it.
 console.log('== install + prebuild the Expo fixture ==');
-run('npm install --no-audit --no-fund', FIXTURE);
+// --no-package-lock: the packed tarball's integrity changes every run, so a
+// lockfile would EINTEGRITY-fail on re-pack. Resolve fresh from the actual file.
+run('npm install --no-audit --no-fund --no-package-lock', FIXTURE);
 run('npx expo prebuild --clean --no-install', FIXTURE);
 
 // 3. Assert the generated native config via Expo's own readers.

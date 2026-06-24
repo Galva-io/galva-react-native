@@ -2,8 +2,11 @@
 /ios/
 /android/
 
-# Local tarball of the SDK, packed by the E2E script.
+# Local tarball of the SDK, packed by the E2E script. `npm pack` is not
+# byte-reproducible, so its integrity differs every run — never commit a lockfile
+# that would pin it (the E2E installs with --no-package-lock).
 galva.tgz
+package-lock.json
 
 # Installed deps + Expo/Metro caches.
 node_modules/

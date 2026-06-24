@@ -45,7 +45,9 @@ echo "==> pack @galva/react-native"
 ( cd "$ROOT" && npm pack --silent && mv galva-react-native-*.tgz "$FIXTURE/galva.tgz" )
 
 echo "==> install + prebuild (iOS) the Expo fixture"
-( cd "$FIXTURE" && npm install --no-audit --no-fund && npx expo prebuild --platform ios --clean )
+# --no-package-lock: the packed tarball's integrity changes every run, so a
+# committed lockfile would EINTEGRITY-fail on re-pack.
+( cd "$FIXTURE" && npm install --no-audit --no-fund --no-package-lock && npx expo prebuild --platform ios --clean )
 
 echo "==> pod install"
 ( cd "$FIXTURE/ios" && pod install )
