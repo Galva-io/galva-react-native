@@ -15,6 +15,7 @@ export { identifyUser } from './api/identify';
 export { getIdentifiedUserId } from './api/getIdentifiedUserId';
 export { logOut } from './api/logOut';
 export { setUserAttributes } from './api/setUserAttributes';
+export { setUserAttribute } from './api/setUserAttribute';
 export { registerAPNsToken } from './api/registerAPNsToken';
 export { registerFCMToken } from './api/registerFCMToken';
 export { handleNotificationResponse } from './api/handleNotificationResponse';

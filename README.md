@@ -119,6 +119,7 @@ import {
   trackEvent,
   identifyUser,
   getIdentifiedUserId,
+  setUserAttribute,
   setUserAttributes,
   logOut,
   setOptOut,
@@ -158,6 +159,12 @@ setUserAttributes({
   totalLifetimeValue: 129.97,
   plan: 'pro', // custom attribute (string | number | boolean | null)
 });
+
+// Or set a single attribute — no need to resend the whole bag. Type-safe:
+// known traits enforce their value type; custom keys accept any scalar.
+setUserAttribute('email', 'jane@example.com');
+setUserAttribute('totalLifetimeValue', 129.97);
+setUserAttribute('plan', 'pro');
 ```
 
 > Invalid emails are dropped before they're sent.
@@ -386,7 +393,8 @@ Imported from `@galva/react-native`:
 | `identifyUser` | `(userId: string, options?: { appAccountToken?: string }) => void` | |
 | `getIdentifiedUserId` | `() => Promise<string \| null>` | |
 | `logOut` | `() => void` | |
-| `setUserAttributes` | `(attributes: GalvaUserAttributes) => void` | typed traits + custom |
+| `setUserAttribute` | `<K>(key: K, value) => void` | single typed/custom trait |
+| `setUserAttributes` | `(attributes: GalvaUserAttributes) => void` | typed traits + custom (bulk) |
 | `setOptOut` | `(optedOut: boolean) => void` | |
 | `isOptedOut` | `() => Promise<boolean>` | |
 | `handleDeepLink` | `(url: string) => Promise<boolean>` | manual forward |
@@ -405,6 +413,39 @@ From `@galva/react-native/react`: `useGalvaConfig(config)`, `useInAppMessages()`
 All types (`GalvaConfig`, `GalvaUserAttributes`, `GalvaLogEntry`,
 `GalvaInAppMessage`, `GalvaError`, …) are exported from the package root. See
 [`docs/`](./docs) for more.
+
+## TypeScript
+
+The whole surface is strict and fully typed. Two opt-in conveniences:
+
+**Type your custom user attributes.** `GalvaUserAttributes` is an open interface —
+augment it once to get autocomplete and type-checking on your own traits (values
+must be scalars):
+
+```ts
+// galva.d.ts — anywhere in your project
+declare module '@galva/react-native' {
+  interface GalvaUserAttributes {
+    planTier?: 'free' | 'pro';
+    referralCount?: number;
+  }
+}
+```
+
+```ts
+setUserAttribute('planTier', 'pro'); // ✅ autocompleted; 'gold' is a type error
+setUserAttribute('referralCount', 3); // ✅ number enforced
+```
+
+**Namespaced calls.** Prefer `Galva.trackEvent(…)`? A namespace import works and
+stays tree-shakeable — no separate "client" object:
+
+```ts
+import * as Galva from '@galva/react-native';
+
+Galva.configureSDK({ apiKey: 'gv_pub_xxx' });
+Galva.trackEvent('paywall_viewed');
+```
 
 ## Native SDKs
 

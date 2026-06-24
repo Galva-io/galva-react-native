@@ -6,7 +6,10 @@ import type { GalvaUserAttributes } from '../types';
  * Set one or more user attributes. Known traits (`email`, `fullName`,
  * `firstName`, `lastName`, `country`, `timezone`, `languageCode`,
  * `totalLifetimeValue`) map to Galva's canonical keys; any other key is sent as
- * a custom trait. Fire-and-forget.
+ * a custom trait. Fire-and-forget. For one key, use `setUserAttribute`.
+ *
+ * @example
+ * setUserAttributes({ email: 'jane@example.com', country: 'US', plan: 'pro' });
  */
 export function setUserAttributes(attributes: GalvaUserAttributes): void {
   GalvaNative.setUserAttributes(toWireAttributes(attributes));

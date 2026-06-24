@@ -5,6 +5,10 @@ import { GalvaNative } from '../native/GalvaNative';
  * disabled auto-wiring (swizzling) or source the token from another push
  * library. The token is device-scoped — call it once; the SDK keeps it
  * associated across identity changes.
+ *
+ * @example
+ * // hex string from didRegisterForRemoteNotificationsWithDeviceToken
+ * registerAPNsToken(deviceTokenHex);
  */
 export function registerAPNsToken(tokenHex: string): void {
   GalvaNative.registerAPNsToken(tokenHex);

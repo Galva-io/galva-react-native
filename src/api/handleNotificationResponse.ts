@@ -6,6 +6,9 @@ import type { GalvaNotificationResponse } from '../types';
  * needed if you've disabled auto-wiring (swizzling) or own the notification
  * delegate via another push library. Galva tracks only its own notifications
  * (those carrying the `"sender": "galva"` marker). `action` defaults to a tap.
+ *
+ * @example
+ * handleNotificationResponse({ id: notif.id, userInfo: notif.payload });
  */
 export function handleNotificationResponse(
   response: GalvaNotificationResponse

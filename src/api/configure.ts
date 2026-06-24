@@ -9,6 +9,9 @@ import type { GalvaConfig } from '../types';
  * `useGalvaConfig` hook). Re-configuring is ignored by the native core. Also
  * installs deep-link forwarding via React Native's `Linking` API and, in dev,
  * mirrors SDK logs to the JS console (see `logToConsole` / `setLogger`).
+ *
+ * @example
+ * configureSDK({ apiKey: 'gv_pub_xxx', environment: 'production', logLevel: 'warning' });
  */
 export function configureSDK(config: GalvaConfig): void {
   // Build the native payload, including only the keys that are set
