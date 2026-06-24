@@ -29,6 +29,42 @@ export type GalvaLogLevel =
   | 'fault'
   | 'off';
 
+/**
+ * Subsystem a log entry came from. Mirrors the iOS core's `LogCategory`; the
+ * open `(string & {})` keeps it forward-compatible if the core adds categories.
+ */
+export type GalvaLogCategory =
+  | 'config'
+  | 'identity'
+  | 'queue'
+  | 'storage'
+  | 'uploader'
+  | 'lifecycle'
+  | (string & {});
+
+/**
+ * One structured log entry forwarded from the native SDK. Mirrors the iOS
+ * core's `Galva.LogEntry`.
+ */
+export interface GalvaLogEntry {
+  readonly level: GalvaLogLevel;
+  readonly category: GalvaLogCategory;
+  readonly message: string;
+  /** Structured key/value context, when present. */
+  readonly metadata?: Record<string, string>;
+  /** Stringified error, when the entry carried one. */
+  readonly error?: string;
+  /** Epoch milliseconds. */
+  readonly timestamp: number;
+}
+
+/**
+ * A custom log sink. Install via `setLogger` to forward Galva's logs into your
+ * own pipeline (a remote log server, Sentry, Datadog, …). Receives every entry
+ * that passes the configured `logLevel`. Mirrors iOS's `GalvaLogger`.
+ */
+export type GalvaLogger = (entry: GalvaLogEntry) => void;
+
 /** Options accepted by `configureSDK`. */
 export interface GalvaConfig {
   /** Publishable API key (`gv_pub_…`). */
@@ -37,6 +73,12 @@ export interface GalvaConfig {
   readonly environment?: GalvaEnvironment;
   /** Log verbosity. Defaults to `'warning'`. */
   readonly logLevel?: GalvaLogLevel;
+  /**
+   * Print SDK logs to the JS/Metro console during development. Defaults to
+   * `__DEV__` (on in dev builds, off in release). Independent of `setLogger` —
+   * a custom logger always receives entries regardless of this flag.
+   */
+  readonly logToConsole?: boolean;
   /** Automatic event collection. Both categories default to `true`. */
   readonly autoTrack?: {
     /** Auto-track app lifecycle (`session_start`). */

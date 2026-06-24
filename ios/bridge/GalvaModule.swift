@@ -52,15 +52,26 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
     return pendingMessages[id]
   }
 
+  override init() {
+    super.init()
+    // So the core-held log sink can reach this live module instance.
+    GalvaLogBridge.shared.attach(self)
+  }
+
   override static func requiresMainQueueSetup() -> Bool { false }
 
-  override func supportedEvents() -> [String] { [Self.messageEvent] }
+  override func supportedEvents() -> [String] {
+    [Self.messageEvent, GalvaLogBridge.logEvent]
+  }
 
   deinit { streamTask?.cancel() }
 
   // MARK: - Event stream (InAppMessages.messages → "galva#message")
 
   override func startObserving() {
+    // RCTEventEmitter calls this on the first JS listener for ANY galva event
+    // (message or log) — gate log forwarding on a live listener.
+    GalvaLogBridge.shared.setListening(true)
     streamTask?.cancel()
     streamTask = Task { @MainActor [weak self] in
       for await message in InAppMessages.messages {
@@ -78,6 +89,7 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
   }
 
   override func stopObserving() {
+    GalvaLogBridge.shared.setListening(false)
     streamTask?.cancel()
     streamTask = nil
   }
@@ -112,6 +124,13 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
   @objc(getSDKVersion:withRejecter:)
   func getSDKVersion(_ resolve: RCTPromiseResolveBlock, withRejecter reject: RCTPromiseRejectBlock) {
     resolve(Galva.sdkVersion)
+  }
+
+  @objc(setLogForwarding:)
+  func setLogForwarding(_ enabled: Bool) {
+    // Installs the multiplex (os.Logger + JS bridge) on first enable; entries
+    // still pass the core's `logLevel` filter before reaching JS.
+    GalvaLogBridge.shared.setForwarding(enabled)
   }
 
   // MARK: - Events

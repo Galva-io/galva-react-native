@@ -48,6 +48,11 @@ export interface GalvaNativeModule {
 
   showMessage(messageId: string): Promise<void>;
 
+  // Toggle native→JS log forwarding (the `galva#log` event stream). Enabled by
+  // the JS logging layer in dev or when a custom logger is set; off otherwise so
+  // release builds pay nothing.
+  setLogForwarding(enabled: boolean): void;
+
   // Provided natively by RCTEventEmitter; required for NativeEventEmitter.
   addListener(eventName: string): void;
   removeListeners(count: number): void;

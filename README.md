@@ -108,6 +108,46 @@ auto-wiring.
   </intent-filter>
   ```
 
+## Logging
+
+The SDK logs what it's doing through the iOS core's structured logger. In React
+Native you can **view** those logs and **forward** them anywhere — same capability
+as iOS.
+
+**View in development.** By default, SDK logs print to your Metro/JS console in
+`__DEV__` (mapped to `console.debug/info/warn/error`). Set verbosity with
+`logLevel`; silence with `logToConsole: false`:
+
+```ts
+configureSDK({ apiKey: 'gv_pub_xxx', logLevel: 'debug' });
+// [galva:queue] drained 5 messages
+// [galva:uploader] POST /events 200
+```
+
+On iOS you can additionally view them in Console.app / Xcode under subsystem
+`co.galva.sdk` (independent of the JS console).
+
+**Forward to your own pipeline.** Install a custom logger to ship entries to a
+remote log server, Sentry, Datadog, etc. It receives every entry that passes
+`logLevel`, in dev and release (mirrors iOS's `Galva.setLogger`):
+
+```ts
+import { setLogger } from '@galva/react-native';
+
+setLogger((entry) => {
+  // entry: { level, category, message, metadata?, error?, timestamp }
+  fetch('https://logs.example.com/ingest', {
+    method: 'POST',
+    body: JSON.stringify(entry),
+  });
+});
+
+setLogger(null); // remove; back to the dev-console default
+```
+
+Logging originates from the iOS core today; Android forwards nothing until its
+native core lands.
+
 ## License
 
 MIT © Galva

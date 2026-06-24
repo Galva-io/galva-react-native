@@ -66,6 +66,7 @@
     "test:ios": "bash scripts/test-autowire.sh",
     "test:ios:e2e": "bash scripts/test-autowire-e2e.sh",
     "test:plugin": "bun scripts/test-plugin.ts",
+    "test:logging": "bun scripts/test-logging.ts",
     "test:expo:prebuild": "bun scripts/test-expo-prebuild.ts",
     "test:expo:runtime": "bash scripts/test-expo-runtime.sh",
     "format": "prettier --write \"**/*.{js,mjs,ts,tsx,md,json}\"",

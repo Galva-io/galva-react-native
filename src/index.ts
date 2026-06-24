@@ -23,6 +23,7 @@ export { setOptOut } from './api/setOptOut';
 export { isOptedOut } from './api/isOptedOut';
 export { reconcileTransactions } from './api/reconcileTransactions';
 export { getSDKVersion } from './api/getSDKVersion';
+export { setLogger } from './api/setLogger';
 
 /** The JS package version. The native SDK version is `getSDKVersion()`. */
 export const VERSION = '0.1.0';

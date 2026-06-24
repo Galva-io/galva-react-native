@@ -44,4 +44,6 @@ RCT_EXTERN_METHOD(handleDeepLink:(NSString *)url withResolver:(RCTPromiseResolve
 
 RCT_EXTERN_METHOD(showMessage:(NSString *)messageId withResolver:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(setLogForwarding:(BOOL)enabled)
+
 @end
