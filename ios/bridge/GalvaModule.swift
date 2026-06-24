@@ -98,11 +98,14 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
 
   @objc(configureSDK:)
   func configureSDK(_ options: NSDictionary) {
+    // Parse via the generated NativeGalvaConfig (GalvaBridgeTypes.swift) so the
+    // payload shape is checked against GalvaNative.ts at build time.
+    guard let config = NativeGalvaConfig.fromBridgePayload(options) else { return }
     Galva.configure(
-      apiKey: options["apiKey"] as? String ?? "",
-      environment: Self.parseEnvironment(options["environment"]),
-      autoTrackCategories: Self.parseAutoTrack(options["autoTrack"]),
-      logLevel: Self.parseLogLevel(options["logLevel"])
+      apiKey: config.apiKey,
+      environment: Self.environment(config.environment),
+      autoTrackCategories: Self.autoTrack(config.autoTrack),
+      logLevel: Self.logLevel(config.logLevel)
     )
   }
 
@@ -187,14 +190,18 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
     // Manual forwarder for apps that own the notification delegate (or opt out
     // of swizzling). Mirrors `Galva.userNotificationCenter(_:didReceive:)` by
     // reusing the same internal helpers — gated to Galva-originated payloads.
-    guard
-      let userInfo = payload["userInfo"] as? [AnyHashable: Any],
-      NotificationResponse.isFromGalva(userInfo)
-    else { return }
-    let id = payload["id"] as? String ?? ""
-    let dismissed = (payload["action"] as? String) == "dismiss"
+    // Parsed via the generated NativeNotificationResponse for shape safety.
+    guard let response = NativeNotificationResponse.fromBridgePayload(payload) else { return }
+    let userInfo: [AnyHashable: Any] = response.userInfo.reduce(into: [:]) {
+      $0[$1.key] = $1.value.unwrapped
+    }
+    guard NotificationResponse.isFromGalva(userInfo) else { return }
+    let dismissed = response.action == .dismiss
     let eventName = dismissed ? NotificationEvent.dismissed : NotificationEvent.tapped
-    AppEvents.track(eventName, attributes: NotificationResponse.attributes(id: id, userInfo: userInfo))
+    AppEvents.track(
+      eventName,
+      attributes: NotificationResponse.attributes(id: response.id, userInfo: userInfo)
+    )
   }
 
   // MARK: - Deep links
@@ -247,29 +254,33 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
 
   // MARK: - Parsing helpers
 
-  private static func parseEnvironment(_ value: Any?) -> Galva.Environment {
-    if let name = value as? String {
+  // Map the generated `NativeGalvaConfig` payload → the core's configure types.
+  // Typed input (not `Any?`): a field renamed in GalvaNative.ts is a build error
+  // here, not a silent runtime drop.
+
+  private static func environment(_ env: NativeGalvaConfigEnvironment?) -> Galva.Environment {
+    switch env {
+    case .named(let name):
       return name == "development" ? .development : .production
-    }
-    if let dict = value as? [String: Any],
-       let api = (dict["apiBaseURL"] as? String).flatMap(URL.init(string:)),
-       let cdn = (dict["webviewBundleCDN"] as? String).flatMap(URL.init(string:)) {
+    case .custom(let custom):
+      guard let api = URL(string: custom.apiBaseURL),
+            let cdn = URL(string: custom.webviewBundleCDN) else { return .production }
       return .custom(apiBaseURL: api, webviewBundleCDN: cdn)
+    case nil:
+      return .production
     }
-    return .production
   }
 
-  private static func parseAutoTrack(_ value: Any?) -> Galva.AutoTrackCategory {
+  private static func autoTrack(_ value: NativeGalvaConfigAutoTrack?) -> Galva.AutoTrackCategory {
     // Both default ON (mirrors the core default [.lifecycle, .appleSearchAds]).
-    let dict = value as? [String: Any] ?? [:]
     var categories: Galva.AutoTrackCategory = []
-    if (dict["lifecycle"] as? Bool) ?? true { categories.insert(.lifecycle) }
-    if (dict["appleSearchAds"] as? Bool) ?? true { categories.insert(.appleSearchAds) }
+    if value?.lifecycle ?? true { categories.insert(.lifecycle) }
+    if value?.appleSearchAds ?? true { categories.insert(.appleSearchAds) }
     return categories
   }
 
-  private static func parseLogLevel(_ value: Any?) -> Galva.LogLevel {
-    switch value as? String {
+  private static func logLevel(_ value: String?) -> Galva.LogLevel {
+    switch value {
     case "debug":   return .debug
     case "info":    return .info
     case "notice":  return .notice
