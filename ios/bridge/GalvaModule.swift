@@ -105,7 +105,8 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
       apiKey: config.apiKey,
       environment: Self.environment(config.environment),
       autoTrackCategories: Self.autoTrack(config.autoTrack),
-      logLevel: Self.logLevel(config.logLevel)
+      logLevel: Self.logLevel(config.logLevel),
+      wrapper: Self.wrapper(config.wrapper)
     )
   }
 
@@ -277,6 +278,14 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
     if value?.lifecycle ?? true { categories.insert(.lifecycle) }
     if value?.appleSearchAds ?? true { categories.insert(.appleSearchAds) }
     return categories
+  }
+
+  // The JS layer always sends `react-native-<platform>/<package version>` so the
+  // backend can tell a React Native install apart from the native iOS core it
+  // wraps. A nil wrapper (older JS) leaves the core's `ios/<version>` identity.
+  private static func wrapper(_ value: NativeGalvaConfigWrapper?) -> SDKWrapper? {
+    guard let value else { return nil }
+    return SDKWrapper(name: value.name, version: value.version)
   }
 
   private static func logLevel(_ value: String?) -> Galva.LogLevel {

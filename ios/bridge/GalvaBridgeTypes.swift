@@ -38,11 +38,17 @@ struct NativeGalvaConfigAutoTrack: Decodable {
     let appleSearchAds: Bool?
 }
 
+struct NativeGalvaConfigWrapper: Decodable {
+    let name: String
+    let version: String
+}
+
 struct NativeGalvaConfig: Decodable {
     let apiKey: String
     let environment: NativeGalvaConfigEnvironment?
     let logLevel: String?
     let autoTrack: NativeGalvaConfigAutoTrack?
+    let wrapper: NativeGalvaConfigWrapper?
 }
 
 enum NativeNotificationResponseAction: String, Decodable {

@@ -43,11 +43,15 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run check:bridge
+      # src/version.ts (the SDK-identity version) must match package.json.
+      - run: npm run check:version
       - run: npm run build
       # Expo config-plugin transforms (deep-link scheme registration, etc.)
       - run: npm run test:plugin
       # Log formatting/routing helpers (console mapping + custom-logger routing).
       - run: npm run test:logging
+      # Pins the react-native-<platform>/<version> SDK identity (traceability).
+      - run: npm run test:identity
 
   ios:
     name: iOS (example pod install + build)

@@ -16,6 +16,15 @@ export interface NativeGalvaConfig {
   environment?: string | { apiBaseURL: string; webviewBundleCDN: string };
   logLevel?: string;
   autoTrack?: { lifecycle?: boolean; appleSearchAds?: boolean };
+  /**
+   * SDK-identity override. Rebrands the `x-sdk-version` request header (and the
+   * library context on every message) from the vendored native core's default
+   * (`ios/<core version>`) to this name/version. `configureSDK` always sets it
+   * to `react-native-<platform>/<package version>` so the backend can tell a
+   * React Native install apart from a native iOS one — otherwise RN traffic is
+   * untraceable. Maps to the core's `Galva.configure(wrapper:)`.
+   */
+  wrapper?: { name: string; version: string };
 }
 
 /** Forwarded notification interaction (manual / opt-out path). */

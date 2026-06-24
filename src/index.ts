@@ -26,5 +26,6 @@ export { reconcileTransactions } from './api/reconcileTransactions';
 export { getSDKVersion } from './api/getSDKVersion';
 export { setLogger } from './api/setLogger';
 
-/** The JS package version. The native SDK version is `getSDKVersion()`. */
-export const VERSION = '0.1.0';
+// The JS package version (generated from package.json). The native core version
+// is a separate value — read it with `getSDKVersion()`.
+export { VERSION } from './version';
