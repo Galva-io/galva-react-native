@@ -1,0 +1,16 @@
+{
+  "name": "galva-expo-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "prebuild": "expo prebuild --clean"
+  },
+  "dependencies": {
+    "@galva/react-native": "file:./galva.tgz",
+    "expo": "~56.0.12",
+    "react": "19.2.3",
+    "react-native": "0.85.3"
+  }
+}

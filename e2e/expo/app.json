@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "GalvaExpoE2E",
+    "slug": "galva-expo-e2e",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "galvaexpoe2e",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "co.galva.expoe2e"
+    },
+    "android": {
+      "package": "co.galva.expoe2e"
+    },
+    "plugins": [
+      ["@galva/react-native", { "deepLinkScheme": "gvexpoe2e" }]
+    ]
+  }
+}

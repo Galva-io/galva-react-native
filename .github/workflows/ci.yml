@@ -1,11 +1,16 @@
 # CI for @galva/react-native.
 #
-#   • js  — the always-on gates: strict typecheck, lint, bridge-contract guard,
-#           and the bob/plugin build. No native toolchain needed.
-#   • ios — the native gate: pod install + build the example app, which compiles
-#           the vendored Swift core + bridge + auto-wire against React Native.
+#   • js       — always-on gates: strict typecheck, lint, bridge-contract guard,
+#                bob/plugin build, plugin tests. No native toolchain needed.
+#   • ios      — native gate: pod install + build the example app (vendored Swift
+#                core + bridge + auto-wire) and the swizzler unit + E2E tests.
+#   • expo-l1  — Expo integration, fast: runs a real `expo prebuild` on the
+#                committed fixture and asserts the generated native config. PR gate.
+#   • expo-l2  — Expo integration, deep: native-builds the prebuilt Expo app and
+#                verifies the deep-link scheme routes at runtime. Nightly + manual
+#                (heavy), not a PR gate.
 #
-# The iOS core compiles against the iOS 26 SDK (Xcode 26), so the example's
+# The iOS core compiles against the iOS 26 SDK (Xcode 26), so any native build's
 # React Native must be a version that also supports that toolchain (clang 21).
 
 name: CI
@@ -14,6 +19,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    - cron: '0 7 * * *' # nightly — exercises the heavy expo-l2 native build
+  workflow_dispatch: # manual trigger for expo-l2
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -88,3 +96,52 @@ jobs:
       # real-launch install + framework coexistence.)
       - name: Swizzler E2E (real app lifecycle + competitor coexistence)
         run: npm run test:ios:e2e
+
+  # L1 — Expo integration, deterministic + device-free. Packs the SDK, installs
+  # it into the committed Expo fixture exactly as a consumer would, runs a real
+  # `expo prebuild`, and asserts the generated native config (deep-link scheme
+  # registered on both platforms; no push config injected). Runs on every PR.
+  expo-l1:
+    name: Expo (prebuild config assertions)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run test:expo:prebuild
+
+  # L2 — Expo integration, runtime. Native-builds the prebuilt Expo app (proves
+  # SDK ↔ Expo native-build compatibility) and verifies the plugin-registered
+  # deep-link scheme routes a gv:// URL to the app on a simulator. Heavy, so it's
+  # nightly + manual only — not a PR gate.
+  expo-l2:
+    name: Expo (runtime deep-link smoke)
+    runs-on: macos-15
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 26 (required by the Galva iOS core)
+        run: |
+          XCODE="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)"
+          [ -z "$XCODE" ] && XCODE="$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          echo "Selecting $XCODE"
+          sudo xcode-select -switch "$XCODE"
+          xcodebuild -version
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run test:expo:runtime
+
+      - name: Upload Expo runtime artifacts (screenshot + log)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: expo-runtime-artifacts
+          path: e2e/expo/.artifacts
+          if-no-files-found: ignore

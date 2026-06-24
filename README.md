@@ -14,9 +14,10 @@ first-party Swift core (vendored into the pod); Android integration is coming.
   module runs on the New Architecture via the interop layer).
 - **Non-blocking** — every call is fire-and-forget or promise-based; nothing
   blocks the JS thread.
-- **Zero-setup linking & push** — deep links are observed through React
-  Native's `Linking` API; APNs token + notification taps are captured
-  automatically on iOS. The Expo plugin even registers your Galva URL scheme.
+- **Zero-setup tracking** — deep links are observed through React Native's
+  `Linking` API; once your app enables push, the APNs token + notification taps
+  are captured automatically on iOS. The Expo plugin registers your Galva URL
+  scheme too. (Setting up push capability itself is yours to do — see below.)
 - **Bare and Expo** — ships an Expo config plugin so managed apps need no
   native edits.
 
@@ -46,7 +47,8 @@ export default function App() {
 }
 ```
 
-See [`docs/`](./docs) for the full API, Expo setup, and push notifications.
+See [`docs/`](./docs) for the full API, and [`docs/expo.md`](./docs/expo.md) for
+Expo setup (Galva needs a **dev build** — it doesn't run in Expo Go).
 
 ## Deep links
 
@@ -69,8 +71,15 @@ or scene edits.
 }
 ```
 
-`deepLinkScheme` also accepts an array (`["gvabc123", "gvdef456"]`). Other plugin
-props: `push` (default `true`), `swizzle` (default `true`).
+`deepLinkScheme` also accepts an array (`["gvabc123", "gvdef456"]`). The other
+plugin prop is `swizzle` (default `true`) — set it `false` to opt out of iOS push
+auto-wiring.
+
+> **Push setup is yours.** Galva auto-wires the *observation* of push (APNs token
+> + notification taps, via swizzling) but doesn't configure push capability. Add
+> entitlements / `UIBackgroundModes` / the Android `POST_NOTIFICATIONS` permission
+> and request authorization yourself — e.g. with
+> [`expo-notifications`](https://docs.expo.dev/push-notifications/overview/).
 
 **Bare React Native** — the plugin isn't read, so register the scheme yourself
 (this is the standard iOS/Android URL-scheme setup):

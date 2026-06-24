@@ -11,6 +11,7 @@ export default tseslint.config(
       'lib/',
       'node_modules/',
       'example/',
+      'e2e/', // standalone Expo fixture app — verified by running, not linting
       'examples-compat/',
       'plugin/',
       'ios/',
