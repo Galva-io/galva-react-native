@@ -120,9 +120,12 @@ as iOS.
 
 ```ts
 configureSDK({ apiKey: 'gv_pub_xxx', logLevel: 'debug' });
-// [galva:queue] drained 5 messages
-// [galva:uploader] POST /events 200
+// INFO  [galva:queue] drained 5 messages
+// WARN  [galva:uploader] retryable failure { status: '503' }
 ```
+
+Each line is prefixed with its level (`DEBUG`/`INFO`/`NOTICE`/`WARN`/`ERROR`/
+`FAULT`), ANSI-colored by severity in the Metro/terminal console.
 
 On iOS you can additionally view them in Console.app / Xcode under subsystem
 `co.galva.sdk` (independent of the JS console).

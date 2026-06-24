@@ -9,7 +9,7 @@
 //
 
 import assert from 'node:assert/strict';
-import { consoleCall, dispatchEntry } from '../src/internal/logFormat';
+import { consoleCall, dispatchEntry, formatHeader } from '../src/internal/logFormat';
 import type { GalvaLogEntry, GalvaLogLevel } from '../src/types';
 
 let passed = 0;
@@ -40,9 +40,15 @@ for (const [level, method] of mapping) {
   });
 }
 
-test('args start with [galva:category] + message', () => {
-  const { args } = consoleCall(entry({ category: 'uploader', message: 'sent' }));
-  assert.deepEqual(args.slice(0, 2), ['[galva:uploader]', 'sent']);
+test('header carries colored level label + dimmed category; message separate', () => {
+  const { args } = consoleCall(
+    entry({ level: 'warning', category: 'uploader', message: 'sent' })
+  );
+  const header = args[0] as string;
+  assert.match(header, /WARN/); // standard-JS-style level prefix
+  assert.match(header, /\[galva:uploader\]/);
+  assert.ok(header.includes('\x1b[33m'), 'warning is yellow');
+  assert.equal(args[1], 'sent');
 });
 
 test('metadata appended only when non-empty', () => {
@@ -57,6 +63,26 @@ test('error appended when present', () => {
   const { args } = consoleCall(entry({ error: 'boom' }));
   assert.equal(args[args.length - 1], 'boom');
 });
+
+console.log('formatHeader (level prefix + ANSI color)');
+
+const headers: Array<[GalvaLogLevel, string, string]> = [
+  ['debug', 'DEBUG', '\x1b[90m'],
+  ['info', 'INFO', '\x1b[36m'],
+  ['notice', 'NOTICE', '\x1b[34m'],
+  ['warning', 'WARN', '\x1b[33m'],
+  ['error', 'ERROR', '\x1b[31m'],
+  ['fault', 'FAULT', '\x1b[91m'],
+];
+for (const [level, label, color] of headers) {
+  test(`${level} → "${label}" prefix + color`, () => {
+    const header = formatHeader(level, 'queue');
+    assert.match(header, new RegExp(label));
+    assert.ok(header.includes(color), `${level} uses its color`);
+    assert.ok(header.includes('[galva:queue]'));
+    assert.ok(header.includes('\x1b[0m'), 'resets styling');
+  });
+}
 
 console.log('dispatchEntry (routing)');
 
