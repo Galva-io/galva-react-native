@@ -47,6 +47,7 @@ export interface GalvaNativeModule {
   identifyUser(userId: string, appAccountToken: string | null): void;
   logOut(): void;
   getIdentifiedUserId(): Promise<string | null>;
+  getAppAccountToken(): Promise<string | null>;
   setUserAttributes(attributes: Record<string, unknown>): void;
 
   registerAPNsToken(tokenHex: string): void;

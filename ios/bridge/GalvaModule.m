@@ -32,6 +32,8 @@ RCT_EXTERN_METHOD(logOut)
 
 RCT_EXTERN_METHOD(getIdentifiedUserId:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(getAppAccountToken:(RCTPromiseResolveBlock)resolve withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(setUserAttributes:(NSDictionary *)attributes)
 
 RCT_EXTERN_METHOD(registerAPNsToken:(NSString *)tokenHex)

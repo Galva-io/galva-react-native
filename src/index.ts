@@ -13,6 +13,7 @@ export { configureSDK } from './api/configure';
 export { trackEvent } from './api/track';
 export { identifyUser } from './api/identify';
 export { getIdentifiedUserId } from './api/getIdentifiedUserId';
+export { getAppAccountToken } from './api/getAppAccountToken';
 export { logOut } from './api/logOut';
 export { setUserAttributes } from './api/setUserAttributes';
 export { setUserAttribute } from './api/setUserAttribute';

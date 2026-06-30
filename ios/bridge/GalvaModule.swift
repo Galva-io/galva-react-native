@@ -163,6 +163,13 @@ final class GalvaModule: RCTEventEmitter, @unchecked Sendable {
     resolve(AppUser.identifiedUserId)
   }
 
+  @objc(getAppAccountToken:withRejecter:)
+  func getAppAccountToken(_ resolve: RCTPromiseResolveBlock, withRejecter reject: RCTPromiseRejectBlock) {
+    // Resolved purchase token (developer override or Galva's generated one),
+    // lowercased to match the wire convention. nil only before configureSDK().
+    resolve(AppUser.appAccountToken?.uuidString.lowercased())
+  }
+
   @objc(setUserAttributes:)
   func setUserAttributes(_ attributes: NSDictionary) {
     // Bulk trait set; the core coerces each value (lenient mirror of `track`).
